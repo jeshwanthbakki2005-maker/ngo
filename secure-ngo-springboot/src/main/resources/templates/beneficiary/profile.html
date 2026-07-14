@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - NGO Fund Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: #f0f4ff; color: #1e293b; display: flex; height: 100vh; overflow: hidden; }
+        .sidebar { width: 240px; min-width: 240px; background: #0f172a; display: flex; flex-direction: column; height: 100vh; overflow-y: auto; box-shadow: 4px 0 20px rgba(0,0,0,.3); }
+        .sidebar-brand { padding: 20px 18px 16px; border-bottom: 1px solid rgba(255,255,255,.08); }
+        .brand-icon { width: 42px; height: 42px; border-radius: 10px; background: linear-gradient(135deg,#10b981,#059669); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: white; margin-bottom: 8px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 8px; color: #94a3b8; font-size: .875rem; font-weight: 500; cursor: pointer; transition: all .2s; text-decoration: none; margin-bottom: 2px; }
+        .nav-item:hover { background: rgba(255,255,255,.07); color: #fff; }
+        .nav-item.active { background: linear-gradient(135deg,#10b981,#059669); color: #fff; }
+        .nav-item i { width: 18px; text-align: center; font-size: .9rem; }
+        .nav-badge { margin-left: auto; background: #ef4444; color: #fff; border-radius: 10px; padding: 1px 7px; font-size: .7rem; font-weight: 700; }
+        .sidebar-footer { padding: 14px 10px; border-top: 1px solid rgba(255,255,255,.08); }
+        .sidebar-help { background: rgba(16,185,129,.12); border: 1px solid rgba(16,185,129,.25); border-radius: 10px; padding: 14px; text-align: center; }
+        .btn-logout { display: flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 8px; color: #f87171; font-size: .875rem; font-weight: 500; text-decoration: none; margin-top: 8px; transition: background .2s; }
+        .main-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .topbar { background: #fff; padding: 12px 24px; box-shadow: 0 1px 3px rgba(0,0,0,.07); display: flex; align-items: center; gap: 16px; z-index: 10; }
+        .topbar-title { font-weight: 700; font-size: 1.05rem; color: #0f172a; flex: 1; }
+        .user-pill { display: flex; align-items: center; gap: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 6px 12px; }
+        .user-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg,#10b981,#059669); display: flex; align-items: center; justify-content: center; color: #fff; font-size: .85rem; }
+        .dash-card { background: white; border-radius: 12px; padding: 22px; box-shadow: 0 2px 8px rgba(0,0,0,.05); border: 1px solid #f1f5f9; }
+        .page-content { flex: 1; overflow-y: auto; padding: 24px; background: #f0f4ff; }
+        .detail-label { font-weight: 600; color: #64748b; font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px; }
+        .detail-value { font-size: .95rem; font-weight: 600; color: #0f172a; }
+    </style>
+</head>
+<body>
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-icon"><i class="fas fa-hands-holding-circle"></i></div>
+        <h5 style="color:#fff;font-weight:700;font-size:.95rem;margin:0;">Secure Disaster<br>Relief Platform</h5>
+        <small style="color:#10b981;font-size:.75rem;">Beneficiary Portal</small>
+    </div>
+    <nav style="flex:1;padding:12px 10px;">
+        <a href="/beneficiary/dashboard" class="nav-item"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="/beneficiary/profile" class="nav-item active"><i class="fas fa-user-circle"></i> My Profile</a>
+        <a href="/beneficiary/my-requests" class="nav-item"><i class="fas fa-list-alt"></i> My Requests</a>
+        <a href="/beneficiary/funds-received" class="nav-item"><i class="fas fa-coins"></i> Funds Received</a>
+        <a href="/beneficiary/relief-materials" class="nav-item"><i class="fas fa-box-open"></i> Relief Materials</a>
+        <a href="/beneficiary/campaigns" class="nav-item"><i class="fas fa-bullhorn"></i> Campaigns</a>
+        <a href="/beneficiary/notifications" class="nav-item"><i class="fas fa-bell"></i> Notifications</a>
+        <a href="/beneficiary/support-tickets" class="nav-item"><i class="fas fa-ticket-alt"></i> Support Tickets</a>
+        <a href="/beneficiary/settings" class="nav-item"><i class="fas fa-cog"></i> Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="sidebar-help"><i class="fas fa-hands-helping" style="font-size:1.6rem;color:#10b981;"></i><p style="color:#94a3b8;font-size:.75rem;margin:4px 0;">We are here to help you in your difficult times.</p><small style="color:#64748b;font-size:.7rem;font-weight:600;">Stay strong, stay safe.</small></div>
+        <a href="/auth/logout" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+</div>
+<!-- MAIN -->
+<div class="main-wrap">
+    <div class="topbar">
+        <i class="fas fa-bars" style="color:#64748b;cursor:pointer;"></i>
+        <span class="topbar-title">My Profile</span>
+        <div class="user-pill">
+            <div class="user-avatar"><i class="fas fa-user"></i></div>
+            <div>
+                <strong style="font-size:.85rem;display:block;" th:text="${beneficiary != null ? beneficiary.fullName : 'User'}">User</strong>
+                <small style="color:#64748b;font-size:.72rem;">Beneficiary</small>
+            </div>
+        </div>
+    </div>
+    <div class="page-content">
+        <!-- Profile Hero -->
+        <div class="mb-4" style="background:linear-gradient(135deg,#0f172a,#1e3a5f);color:white;border-radius:16px;padding:28px;display:flex;align-items:center;gap:24px;">
+            <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;font-size:2rem;color:white;flex-shrink:0;"><i class="fas fa-user"></i></div>
+            <div>
+                <h3 th:text="${beneficiary != null ? beneficiary.fullName : 'User'}" style="margin:0 0 4px;font-weight:800;">User</h3>
+                <p th:text="${beneficiary != null ? beneficiary.email : ''}" style="margin:0 0 10px;color:#94a3b8;font-size:.9rem;"></p>
+                <span th:if="${beneficiary != null and beneficiary.isVerified}" style="background:#10b981;color:white;padding:5px 14px;border-radius:20px;font-size:.78rem;font-weight:700;">✓ Verified Account</span>
+                <span th:unless="${beneficiary != null and beneficiary.isVerified}" style="background:#f59e0b;color:white;padding:5px 14px;border-radius:20px;font-size:.78rem;font-weight:700;">⏳ Pending Verification</span>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-8">
+                <div class="dash-card">
+                    <h5 style="font-weight:700;margin-bottom:20px;color:#0f172a;"><i class="fas fa-id-card text-success me-2"></i>Personal Information</h5>
+                    <div class="row g-4">
+                        <div class="col-sm-6">
+                            <div class="detail-label">Full Name</div>
+                            <div class="detail-value" th:text="${beneficiary?.fullName}">-</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="detail-label">Email Address</div>
+                            <div class="detail-value" th:text="${beneficiary?.email}">-</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="detail-label">Phone Number</div>
+                            <div class="detail-value" th:text="${beneficiary?.phone}">-</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="detail-label">Primary Need</div>
+                            <div><span class="badge bg-info text-dark" th:text="${beneficiary?.needCategory}">-</span></div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="detail-label">Family Members</div>
+                            <div class="detail-value" th:text="${(beneficiary?.familyMembers) + ' members'}">-</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="detail-label">Monthly Income</div>
+                            <div class="detail-value" th:text="'&#8377;' + ${beneficiary?.monthlyIncome}">-</div>
+                        </div>
+                        <div class="col-12">
+                            <div class="detail-label">Home Address</div>
+                            <div class="detail-value" th:text="${beneficiary?.address}">-</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="detail-label">Member Since</div>
+                            <div class="detail-value" th:text="${beneficiary?.createdAt != null ? #temporals.format(beneficiary.createdAt, 'dd MMM yyyy') : '-'}">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="dash-card text-center">
+                    <h5 style="font-weight:700;margin-bottom:16px;"><i class="fas fa-shield-alt text-success me-2"></i>Account Status</h5>
+                    <div th:if="${beneficiary != null and beneficiary.isVerified}" style="padding:20px 0;">
+                        <i class="fas fa-check-circle fa-3x text-success mb-3 d-block"></i>
+                        <h5 class="text-success">Verified</h5>
+                        <p class="text-muted" style="font-size:.82rem;">Your account is verified. You are eligible to receive relief funds from our administrators.</p>
+                    </div>
+                    <div th:unless="${beneficiary != null and beneficiary.isVerified}" style="padding:20px 0;">
+                        <i class="fas fa-exclamation-circle fa-3x text-warning mb-3 d-block"></i>
+                        <h5 class="text-warning">Pending Verification</h5>
+                        <p class="text-muted" style="font-size:.82rem;">Your account is under review. You will be notified via email once verified.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

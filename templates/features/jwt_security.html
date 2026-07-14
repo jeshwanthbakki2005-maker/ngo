@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}JWT Security - NGO Fund Tracker{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6">
+            <h1 class="display-4 fw-bold" style="color: var(--pink-deep);">JWT Security</h1>
+            <p class="lead text-muted">State-of-the-art JSON Web Token authentication for uncompromising security.</p>
+        </div>
+        <div class="col-md-6 text-center">
+            <i class="fas fa-lock fa-8x"
+                style="color: var(--pink-light); text-shadow: 0 0 20px rgba(219, 112, 147, 0.5);"></i>
+            <i class="fas fa-shield-alt fa-4x position-absolute"
+                style="color: var(--pink-dark); top: 50%; left: 50%; transform: translate(-50%, -50%);"></i>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 p-4 border-0 shadow-sm">
+                <div class="text-center mb-3">
+                    <i class="fas fa-key fa-3x" style="color: var(--pink-dark);"></i>
+                </div>
+                <h4 class="text-center">Stateless Authentication</h4>
+                <p>Our system uses stateless JWTs, meaning no session data is stored on the server. This improves
+                    scalability and performance while maintaining high security standards.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 p-4 border-0 shadow-sm">
+                <div class="text-center mb-3">
+                    <i class="fas fa-fingerprint fa-3x" style="color: var(--pink-dark);"></i>
+                </div>
+                <h4 class="text-center">Digital Signatures</h4>
+                <p>Every token is digitally signed using a secure secret key. This prevents tampering and ensures that
+                    the data within the token has not been altered by malicious actors.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 p-4 border-0 shadow-sm">
+                <div class="text-center mb-3">
+                    <i class="fas fa-hourglass-half fa-3x" style="color: var(--pink-dark);"></i>
+                </div>
+                <h4 class="text-center">Expiration & Renewal</h4>
+                <p>Tokens have a limited lifespan to minimize risk. Verification mechanisms ensure that even if a token
+                    is intercepted, it is valid only for a short window.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-5 p-5 rounded-3" style="background: linear-gradient(135deg, var(--pink-light) 0%, white 100%);">
+        <h3 class="text-center mb-4" style="color: var(--pink-deep);">How It Protects Your Data</h3>
+        <ul class="list-group list-group-flush bg-transparent">
+            <li class="list-group-item bg-transparent"><i
+                    class="fas fa-check-circle me-2 text-success"></i><strong>Encrypted Transmission:</strong> All data
+                is transmitted over secure channels.</li>
+            <li class="list-group-item bg-transparent"><i
+                    class="fas fa-check-circle me-2 text-success"></i><strong>Role-Based Access Control:</strong> JWTs
+                strictly define user roles (Admin, Donor, Beneficiary) to prevent unauthorized access.</li>
+            <li class="list-group-item bg-transparent"><i
+                    class="fas fa-check-circle me-2 text-success"></i><strong>Cross-Site Request Forgery (CSRF)
+                    Protection:</strong> Cookie-based security measures prevent CSRF attacks.</li>
+        </ul>
+        <div class="text-center mt-4">
+            <a href="{{ url_for('home') }}" class="btn btn-primary btn-lg">Back to Home</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

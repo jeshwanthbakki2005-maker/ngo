@@ -1,0 +1,117 @@
+# ============
+# Maven
+# ============
+target/
+*.class
+*.jar
+*.war
+*.zip
+*.tar.gz
+*.rar
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+
+# ============
+# IDE - IntelliJ IDEA
+# ============
+.idea/
+*.iml
+*.iws
+*.ipr
+.settings/
+.project
+.classpath
+.factorypath
+.vscode/
+
+# ============
+# IDE - Visual Studio Code
+# ============
+.vscode/
+*.code-workspace
+
+# ============
+# IDE - Eclipse
+# ============
+.settings/
+.project
+.classpath
+.factorypath
+*.prefs
+*.log
+
+# ============
+# IDE - NetBeans
+# ============
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# ============
+# Environment & Secrets
+# ============
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.cert
+application-local.properties
+application-dev.properties
+application-secret.properties
+
+# ============
+# Database (local H2 files)
+# ============
+*.mv.db
+*.trace.db
+*.h2.db
+data/
+
+# ============
+# Logs
+# ============
+logs/
+*.log
+log/
+spring.log
+
+# ============
+# OS files
+# ============
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+*~
+
+# ============
+# Build output
+# ============
+out/
+build/
+!src/**/build/
+
+# ============
+# Spring Boot DevTools
+# ============
+.vertx/
+
+# ============
+# Temp files
+# ============
+*.tmp
+*.temp
+*~
+*.bak
+*.orig

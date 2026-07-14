@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFSA Dashboard - NGO Fund Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --pink-light:#FFF0F5; --pink-medium:#FFE4E1; --pink-accent:#FFB6C1; --pink-dark:#DB7093; --pink-deep:#C71585; }
+        body { background:linear-gradient(135deg,var(--pink-light) 0%,var(--pink-medium) 100%); min-height:100vh; font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; }
+        .navbar { background:linear-gradient(90deg,var(--pink-dark) 0%,var(--pink-deep) 100%) !important; box-shadow:0 4px 15px rgba(199,21,133,0.3); }
+        .navbar-brand,.navbar span { color:white !important; font-weight:600; }
+        .card { border:none; border-radius:20px; box-shadow:0 10px 30px rgba(219,112,147,0.2); background:white; }
+        .card-header { background:linear-gradient(90deg,var(--pink-accent) 0%,var(--pink-dark) 100%); color:white; border-radius:20px 20px 0 0 !important; font-weight:600; }
+        .sidebar { background:white; border-radius:20px; padding:20px; box-shadow:0 10px 30px rgba(219,112,147,0.2); }
+        .sidebar-link { display:block; padding:15px 20px; color:var(--pink-deep); text-decoration:none; border-radius:15px; margin-bottom:10px; transition:all 0.3s ease; font-weight:500; cursor:pointer; }
+        .sidebar-link:hover,.sidebar-link.active { background:linear-gradient(90deg,var(--pink-light) 0%,var(--pink-medium) 100%); color:var(--pink-deep); transform:translateX(10px); }
+        .sidebar-link i { margin-right:10px; width:20px; }
+        .stat-card { background:linear-gradient(135deg,white 0%,var(--pink-light) 100%); border-radius:20px; padding:25px; text-align:center; border-left:5px solid var(--pink-dark); }
+        .stat-icon { font-size:3rem; color:var(--pink-dark); margin-bottom:15px; }
+        .stat-value { font-size:2rem; font-weight:700; color:var(--pink-deep); }
+        .stat-label { color:#666; font-weight:500; }
+        .hero-section { background:linear-gradient(135deg,var(--pink-dark) 0%,var(--pink-deep) 100%); color:white; border-radius:30px; padding:30px 40px; margin-bottom:20px; }
+        .progress { height:25px; border-radius:15px; background:var(--pink-light); }
+        .progress-bar { background:linear-gradient(90deg,var(--pink-dark) 0%,var(--pink-deep) 100%); border-radius:15px; }
+        .table thead { background:linear-gradient(90deg,var(--pink-accent) 0%,var(--pink-dark) 100%); color:white; }
+        .table tbody tr:hover { background-color:var(--pink-light); }
+        .badge-verified { background:linear-gradient(90deg,#28a745 0%,#20c997 100%); padding:6px 12px; border-radius:20px; color:white; }
+        .badge-pending { background:linear-gradient(90deg,#ffc107 0%,#fd7e14 100%); padding:8px 15px; border-radius:20px; color:white; font-size:1.1rem; font-weight:700; }
+        footer { background:linear-gradient(90deg,var(--pink-dark) 0%,var(--pink-deep) 100%); color:white; padding:20px 0; margin-top:50px; }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+        @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+        .floating-icon { animation:float 3s ease-in-out infinite; }
+        .pulse-icon { animation:pulse 2s ease-in-out infinite; }
+        .content-section { display: none; }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="/nfsa/dashboard.html"><i class="fas fa-hand-holding-heart me-2 floating-icon"></i>NGO Fund Tracker</a>
+        <div class="d-flex align-items-center">
+            <span class="text-white me-3"><i class="fas fa-user-tie me-2"></i><span id="userName">Admin</span></span>
+            <button class="btn btn-light" style="border-radius:25px;" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Logout</button>
+        </div>
+    </div>
+</nav>
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="sidebar">
+                <h5 class="mb-4" style="color:#C71585;"><i class="fas fa-bars me-2"></i>NFSA Menu</h5>
+                <a onclick="showSection('dashboardSection', this)" class="sidebar-link active"><i class="fas fa-tachometer-alt"></i>Dashboard Overview</a>
+                <a onclick="showSection('allocationSection', this); loadAllocations();" class="sidebar-link"><i class="fas fa-hand-holding-usd"></i>Fund Allocation</a>
+                <a onclick="showSection('beneficiarySection', this); loadBeneficiaries();" class="sidebar-link"><i class="fas fa-user-check"></i>Beneficiary Verification</a>
+                <a onclick="showSection('reportsSection', this); loadReports();" class="sidebar-link"><i class="fas fa-file-invoice-dollar"></i>Utilization Reports</a>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <!-- Dashboard Section -->
+            <div id="dashboardSection" class="content-section" style="display:block;">
+                <div class="hero-section mb-4">
+                    <h2><i class="fas fa-chart-line me-2 floating-icon"></i>Welcome, <span id="welcomeName">Admin</span>!</h2>
+                    <p class="mb-0">Nonprofit Financial System Administrator Dashboard</p>
+                </div>
+                <div class="row g-4 mb-4" id="statsRow">
+                    <div class="col-md-3"><div class="stat-card"><i class="fas fa-rupee-sign stat-icon pulse-icon"></i><div class="stat-value" id="statDonations">₹0</div><div class="stat-label">Total Donations</div></div></div>
+                    <div class="col-md-3"><div class="stat-card"><i class="fas fa-hand-holding-heart stat-icon pulse-icon"></i><div class="stat-value" id="statAllocated">₹0</div><div class="stat-label">Total Allocated</div></div></div>
+                    <div class="col-md-3"><div class="stat-card"><i class="fas fa-users stat-icon pulse-icon"></i><div class="stat-value" id="statDonors">0</div><div class="stat-label">Total Donors</div></div></div>
+                    <div class="col-md-3"><div class="stat-card"><i class="fas fa-user-friends stat-icon pulse-icon"></i><div class="stat-value" id="statBeneficiaries">0</div><div class="stat-label">Beneficiaries</div></div></div>
+                </div>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-4">
+                        <div class="card p-3 text-center">
+                            <h5 style="color:#C71585;"><i class="fas fa-clock me-2"></i>Pending Actions</h5>
+                            <hr>
+                            <div class="d-flex justify-content-around">
+                                <div><span class="badge badge-pending" id="pendingDonors">0</span><p class="small mb-0 mt-2">Donors</p></div>
+                                <div><span class="badge badge-pending" id="pendingBeneficiaries">0</span><p class="small mb-0 mt-2">Beneficiaries</p></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card p-3">
+                            <h5 style="color:#C71585;"><i class="fas fa-chart-pie me-2"></i>Fund Utilization</h5>
+                            <div class="progress mt-3"><div class="progress-bar" id="progressBar" style="width:0%">0% Allocated</div></div>
+                            <div class="d-flex justify-content-between mt-2">
+                                <small class="text-muted">Available: <span id="available">₹0</span></small>
+                                <small class="text-muted">Allocated: <span id="allocatedLabel">₹0</span></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-history me-2"></i>Recent Donations</div>
+                    <div class="card-body" id="donationsTable">
+                        <div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-3x" style="color:#FFB6C1;"></i><p class="text-muted mt-3">Loading...</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Allocation Section -->
+            <div id="allocationSection" class="content-section">
+                <div class="card mb-4">
+                    <div class="card-header"><i class="fas fa-hand-holding-usd me-2"></i>Fund Allocation</div>
+                    <div class="card-body">
+                        <div class="alert alert-info"><i class="fas fa-info-circle me-2"></i>View and manage fund allocations here.</div>
+                        <div id="allocationContent">
+                            <div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-3x" style="color:#FFB6C1;"></i><p class="text-muted mt-3">Loading...</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Beneficiary Section -->
+            <div id="beneficiarySection" class="content-section">
+                <div class="card mb-4">
+                    <div class="card-header"><i class="fas fa-user-check me-2"></i>Beneficiary Verification</div>
+                    <div class="card-body" id="beneficiaryContent">
+                        <div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-3x" style="color:#FFB6C1;"></i><p class="text-muted mt-3">Loading...</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports Section -->
+            <div id="reportsSection" class="content-section">
+                <div class="card mb-4">
+                    <div class="card-header"><i class="fas fa-file-invoice-dollar me-2"></i>Utilization Reports</div>
+                    <div class="card-body" id="reportsContent">
+                        <div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-3x" style="color:#FFB6C1;"></i><p class="text-muted mt-3">Loading...</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<footer class="text-center">
+    <div class="container"><p class="mb-0">NGO Fund Tracker - Transparent Donations, Verified Impact</p></div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const token = localStorage.getItem('token');
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    if (!token || localStorage.getItem('userType') !== 'nfsa') { window.location.href = '/nfsa/login.html'; }
+
+    const name = userData.name || userData.fullName || 'Admin';
+    document.getElementById('userName').textContent = name;
+    document.getElementById('welcomeName').textContent = name;
+
+    function logout() { localStorage.clear(); window.location.href = '/index.html'; }
+    
+    function showSection(id, element) {
+        document.querySelectorAll('.content-section').forEach(el => el.style.display = 'none');
+        document.getElementById(id).style.display = 'block';
+        document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active'));
+        if(element) element.classList.add('active');
+    }
+
+    const fmt = n => '₹' + Number(n||0).toLocaleString('en-IN');
+
+    async function loadDashboard() {
+        try {
+            const res = await fetch('/api/nfsa/dashboard', { headers: { 'Authorization': 'Bearer ' + token } });
+            if (res.status === 401) { logout(); return; }
+            const d = await res.json();
+            document.getElementById('statDonations').textContent = fmt(d.totalDonations);
+            document.getElementById('statAllocated').textContent = fmt(d.totalAllocated);
+            document.getElementById('statDonors').textContent = d.totalDonors || 0;
+            document.getElementById('statBeneficiaries').textContent = d.totalBeneficiaries || 0;
+            document.getElementById('pendingDonors').textContent = d.unverifiedDonors || 0;
+            document.getElementById('pendingBeneficiaries').textContent = d.unverifiedBeneficiaries || 0;
+            const pct = d.totalDonations > 0 ? Math.round((d.totalAllocated / d.totalDonations) * 100) : 0;
+            document.getElementById('progressBar').style.width = pct + '%';
+            document.getElementById('progressBar').textContent = pct + '% Allocated';
+            document.getElementById('available').textContent = fmt((d.totalDonations||0) - (d.totalAllocated||0));
+            document.getElementById('allocatedLabel').textContent = fmt(d.totalAllocated);
+            if (d.recentDonations && d.recentDonations.length > 0) {
+                let html = '<div class="table-responsive"><table class="table table-hover mb-0"><thead><tr><th>ID</th><th>Donor</th><th>Amount</th><th>Purpose</th><th>Date</th><th>Status</th></tr></thead><tbody>';
+                d.recentDonations.forEach(don => {
+                    html += `<tr><td>${(don.transactionId||'').substring(0,10)}...</td><td>${don.donorName||''}</td><td>₹${Number(don.amount||0).toLocaleString('en-IN')}</td><td>${don.purpose||''}</td><td>${don.date||''}</td><td><span class="badge badge-verified">${don.status||''}</span></td></tr>`;
+                });
+                html += '</tbody></table></div>';
+                document.getElementById('donationsTable').innerHTML = html;
+            } else {
+                document.getElementById('donationsTable').innerHTML = '<div class="text-center py-4"><i class="fas fa-inbox fa-3x mb-3" style="color:#FFB6C1;"></i><p class="text-muted">No donations yet</p></div>';
+            }
+        } catch(e) {
+            document.getElementById('donationsTable').innerHTML = '<div class="text-center py-4"><i class="fas fa-inbox fa-3x mb-3" style="color:#FFB6C1;"></i><p class="text-muted">No data available yet</p></div>';
+        }
+    }
+
+    async function loadBeneficiaries() {
+        const div = document.getElementById('beneficiaryContent');
+        try {
+            const res = await fetch('/api/nfsa/beneficiaries', { headers: { 'Authorization': 'Bearer ' + token } });
+            if (!res.ok) throw new Error('Failed to load beneficiaries');
+            const bens = await res.json();
+            if(bens.length > 0) {
+                let html = '<div class="table-responsive"><table class="table table-hover mb-0"><thead><tr><th>Name</th><th>Need</th><th>Income</th><th>Verified</th><th>Action</th></tr></thead><tbody>';
+                bens.forEach(b => {
+                    html += `<tr><td>${b.fullName}</td><td>${b.needCategory}</td><td>₹${b.monthlyIncome}</td><td>${b.isVerified ? '<span class="badge badge-verified">Yes</span>' : '<span class="badge badge-pending">No</span>'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-success" onclick="verifyBeneficiary(${b.id}, true)">Verify</button>
+                        <button class="btn btn-sm btn-danger" onclick="verifyBeneficiary(${b.id}, false)">Reject</button>
+                    </td></tr>`;
+                });
+                html += '</tbody></table></div>';
+                div.innerHTML = html;
+            } else {
+                div.innerHTML = '<div class="text-center py-4"><i class="fas fa-check-circle fa-3x mb-3 text-success"></i><p class="text-muted">No pending beneficiaries.</p></div>';
+            }
+        } catch(e) {
+            div.innerHTML = '<p class="text-danger">Failed to load beneficiaries.</p>';
+        }
+    }
+
+    async function verifyBeneficiary(id, verify) {
+        try {
+            const res = await fetch('/api/nfsa/verify-beneficiary?beneficiaryId=' + id + '&verify=' + verify, { 
+                method: 'POST', 
+                headers: { 'Authorization': 'Bearer ' + token, 'X-User-Id': userData.id || '' } 
+            });
+            const data = await res.json();
+            if (res.ok) {
+                loadBeneficiaries();
+                loadDashboard();
+            } else {
+                alert(data.error || 'Error verifying beneficiary');
+            }
+        } catch(e) {
+            alert('Error verifying beneficiary');
+        }
+    }
+
+    async function loadAllocations() {
+        const div = document.getElementById('allocationContent');
+        try {
+            const res = await fetch('/api/nfsa/allocations', { headers: { 'Authorization': 'Bearer ' + token } });
+            if (!res.ok) throw new Error('Failed to load allocations');
+            const allocations = await res.json();
+            if(allocations.length > 0) {
+                let html = '<div class="table-responsive"><table class="table table-hover mb-0"><thead><tr><th>Amount</th><th>Purpose</th><th>Beneficiary ID</th><th>Date</th></tr></thead><tbody>';
+                allocations.forEach(a => {
+                    html += `<tr><td>₹${a.amount}</td><td>${a.purpose}</td><td>${a.beneficiaryId || 'N/A'}</td><td>${a.allocationDate || ''}</td></tr>`;
+                });
+                html += '</tbody></table></div>';
+                div.innerHTML = html;
+            } else {
+                div.innerHTML = '<div class="text-center py-4"><i class="fas fa-inbox fa-3x mb-3 text-muted"></i><p class="text-muted">No allocations yet.</p></div>';
+            }
+        } catch(e) {
+            div.innerHTML = '<p class="text-danger">Failed to load allocations.</p>';
+        }
+    }
+
+    async function loadReports() {
+        const div = document.getElementById('reportsContent');
+        try {
+            const res = await fetch('/api/nfsa/utilization-reports', { headers: { 'Authorization': 'Bearer ' + token } });
+            if (!res.ok) throw new Error('Failed to load reports');
+            const reports = await res.json();
+            if(reports.length > 0) {
+                let html = '<div class="table-responsive"><table class="table table-hover mb-0"><thead><tr><th>Beneficiary ID</th><th>Details</th><th>Date</th><th>Status</th></tr></thead><tbody>';
+                reports.forEach(r => {
+                    html += `<tr><td>${r.beneficiaryId || 'N/A'}</td><td>${r.reportDetails}</td><td>${r.reportDate || ''}</td><td><span class="badge badge-verified">${r.status || 'Verified'}</span></td></tr>`;
+                });
+                html += '</tbody></table></div>';
+                div.innerHTML = html;
+            } else {
+                div.innerHTML = '<div class="text-center py-4"><i class="fas fa-file-alt fa-3x mb-3 text-muted"></i><p class="text-muted">No utilization reports yet.</p></div>';
+            }
+        } catch(e) {
+            div.innerHTML = '<p class="text-danger">Failed to load reports.</p>';
+        }
+    }
+
+    loadDashboard();
+</script>
+</body>
+</html>

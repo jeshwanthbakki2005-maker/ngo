@@ -1,0 +1,74 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: layout(~{::title}, ~{::content})}">
+
+<head><title th:fragment="title">Edit Donor - NGO Fund Tracker</title></head>
+
+
+
+<body><div th:fragment="content">
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+        <div class="card">
+            <div class="card-header text-center py-4">
+                <i class="fas fa-user-edit fa-3x mb-3 floating-icon" style="color: #0288D1;"></i>
+                <h3 class="mb-0">Edit Donor Details</h3>
+                <p class="mb-0 opacity-75">Update donor information</p>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="[[${url_for('nfsa_edit_donor', donor_id=donor.id)}]]">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-user me-2" style="color: #0288D1;"></i>Full Name</label>
+                            <input type="text" class="form-control" name="full_name" required value="[[${donor.fullName}]]" placeholder="Enter full name">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-phone me-2" style="color: #0288D1;"></i>Phone Number</label>
+                            <input type="tel" class="form-control" name="phone" required value="[[${donor.phone}]]" placeholder="+91 9876543210">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-map-marker-alt me-2" style="color: #0288D1;"></i>Address</label>
+                        <textarea class="form-control" name="address" required rows="2" placeholder="Enter complete address">[[${donor.address}]]</textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-id-card me-2" style="color: #0288D1;"></i>ID Type</label>
+                            <select class="form-select" name="id_type" required>
+                                <option value="">-- Select ID Type --</option>
+                                <option value="Aadhar Card" selected>Aadhar Card</option>
+                                <option value="Passport" selected>Passport</option>
+                                <option value="Voter ID" selected>Voter ID</option>
+                                <option value="Driving License" selected>Driving License</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-hashtag me-2" style="color: #0288D1;"></i>ID Number</label>
+                            <input type="text" class="form-control" name="id_number" required value="[[${donor.idNumber}]]" placeholder="Enter ID number">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-file-invoice me-2" style="color: #0288D1;"></i>PAN Number (Optional)</label>
+                        <input type="text" class="form-control" name="pan_number" value="[[${donor.pan_number if donor.pan_number else ''}]]" placeholder="ABCDE1234F">
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Email address cannot be changed. Update other details as needed.
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                            <a th:href="@{/nfsa/dashboard}" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-arrow-left me-2"></i>Back to List
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</div></body></html>

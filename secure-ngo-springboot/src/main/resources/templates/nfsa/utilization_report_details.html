@@ -1,0 +1,166 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: layout(~{::title}, ~{::content})}">
+
+<head><title th:fragment="title">Utilization Report Details - NGO Fund Tracker</title></head>
+
+<body><div th:fragment="content">
+<div class="row">
+    <div class="col-md-3">
+        <div class="sidebar">
+            <h5 class="mb-4" style="color: #C71585;"><i class="fas fa-bars me-2"></i>NFSA Menu</h5>
+            <a th:href="@{/nfsa/dashboard}" class="sidebar-link">
+                <i class="fas fa-tachometer-alt"></i>Dashboard Overview
+            </a>
+            <a th:href="@{/nfsa_fund_allocation}" class="sidebar-link">
+                <i class="fas fa-hand-holding-usd"></i>Fund Allocation
+            </a>
+            <a th:href="@{/nfsa/dashboard}" class="sidebar-link">
+                <i class="fas fa-user-check"></i>Beneficiary Verification
+            </a>
+            <a th:href="@{/nfsa/dashboard}" class="sidebar-link active">
+                <i class="fas fa-file-invoice-dollar"></i>Utilization Reports
+            </a>
+
+
+        
+
+            <a th:href="@{/logout}" class="sidebar-link mt-4" style="color: #dc3545;">
+                <i class="fas fa-sign-out-alt"></i>Logout
+            </a>
+</div>
+    </div>
+    
+    <div class="col-md-9" th:if="${report != null}">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4><i class="fas fa-file-alt me-2" style="color: #DB7093;"></i>Utilization Report Details</h4>
+            <a th:href="@{/nfsa/dashboard}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Report Main Details -->
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-info-circle me-2"></i>Report Information</span>
+                        <span th:if="${report.status == 'Approved'}" class="badge badge-verified">Approved</span>
+                        <span th:if="${report.status == 'Pending'}" class="badge badge-pending">Pending</span>
+                        <span th:if="${report.status == 'Rejected'}" class="badge badge-danger">Rejected</span>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Report ID:</strong> #[[${report.id}]]</p>
+                        <p><strong>Submitted Date:</strong> [[${#temporals.format(report.createdAt, 'dd MMM yyyy, HH:mm')}]]</p>
+                        <hr>
+                        
+                        <h5><i class="fas fa-pen me-2" style="color: #DB7093;"></i>Description of Use</h5>
+                        <div class="p-3 bg-light rounded border mb-4">
+                            [[${report.description}]]
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-receipt me-2" style="color: #DB7093;"></i>Receipt/Invoice Details</h5>
+                                <p th:if="${report.receiptReference != null}"><strong>Reference:</strong> [[${report.receiptReference}]]</p>
+                                <p th:unless="${report.receiptReference != null}" class="text-muted"><em>No receipt reference provided</em></p>
+                            </div>
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-rupee-sign me-2" style="color: #DB7093;"></i>Amount Utilized</h5>
+                                <h3 style="color: #C71585;">₹[[${#numbers.formatDecimal(report.amountUsed ?: 0, 0, 'COMMA', 2, 'POINT')}]]</h3>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div th:if="${report.status == 'Pending'}" class="mt-4 pt-3 border-top d-flex gap-2">
+                            <div class="m-0">
+                                <button class="btn btn-success" disabled title="Action removed"><i class="fas fa-check-circle me-2"></i>Approve Report</button>
+                                <button class="btn btn-danger" disabled title="Action removed"><i class="fas fa-times-circle me-2"></i>Reject Report</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Beneficiary Details -->
+                <div class="card mb-4" th:if="${beneficiary != null}">
+                    <div class="card-header">
+                        <i class="fas fa-user me-2"></i>Beneficiary Details
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; background: linear-gradient(135deg, #FFE4E1, #FFB6C1);">
+                                <i class="fas fa-user fa-2x" style="color: #C71585;"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">[[${beneficiary.fullName}]]</h5>
+                                <span class="badge badge-verified" th:if="${beneficiary.isVerified}">Verified</span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong><i class="fas fa-envelope me-2"></i>Email:</strong> [[${beneficiary.email}]]</p>
+                                <p><strong><i class="fas fa-phone me-2"></i>Phone:</strong> [[${beneficiary.phone}]]</p>
+                                <p><strong><i class="fas fa-tag me-2"></i>Category:</strong> <span class="badge" style="background: linear-gradient(90deg, #DB7093, #C71585);">[[${beneficiary.needCategory}]]</span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong><i class="fas fa-map-marker-alt me-2"></i>Address:</strong> [[${beneficiary.address}]]</p>
+                                <p><strong><i class="fas fa-users me-2"></i>Family Members:</strong> [[${beneficiary.familyMembers}]]</p>
+                                <p><strong><i class="fas fa-dollar-sign me-2"></i>Monthly Income:</strong> ₹[[${#numbers.formatDecimal(beneficiary.monthlyIncome ?: 0, 0, 'COMMA', 2, 'POINT')}]]</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Allocation & Donation Info -->
+            <div class="col-md-4">
+                <div class="card mb-4" th:if="${allocation != null}">
+                    <div class="card-header">
+                        <i class="fas fa-hand-holding-usd me-2"></i>Source Allocation
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Allocation ID:</strong> #[[${allocation.id}]]</p>
+                        <p><strong>Purpose:</strong> [[${allocation.purpose}]]</p>
+                        <p><strong>Total Allocated:</strong> <span style="font-size: 1.1em; color: #C71585;">₹[[${#numbers.formatDecimal(allocation.amount ?: 0, 0, 'COMMA', 2, 'POINT')}]]</span></p>
+                        <p><strong>Status:</strong> <span class="badge badge-verified">[[${allocation.status}]]</span></p>
+                        <p><strong>Allocated Date:</strong> [[${#temporals.format(allocation.createdAt, 'dd MMM yyyy')}]]</p>
+                        
+                        <hr>
+                        <div th:if="${total_utilized != null}">
+                            <p class="mb-1"><strong>Allocation Utilization:</strong></p>
+                            <div class="progress mb-2" style="height: 10px;">
+                                <div class="progress-bar" role="progressbar" th:style="'width: ' + ${percent} + '%; background: linear-gradient(90deg, #DB7093, #C71585);'"></div>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">Utilized: ₹[[${#numbers.formatDecimal(total_utilized ?: 0, 0, 'COMMA', 2, 'POINT')}]] of ₹[[${#numbers.formatDecimal(allocation.amount ?: 0, 0, 'COMMA', 2, 'POINT')}]]</small>
+                                <small class="text-muted">[[${#numbers.formatDecimal(percent ?: 0, 0, 'COMMA', 0, 'POINT')}]]%</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" th:if="${donation != null and donor != null}">
+                    <div class="card-header">
+                        <i class="fas fa-donate me-2"></i>Original Donation
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Donation ID:</strong> [[${donation.transactionId}]]</p>
+                        <p><strong>Amount:</strong> <span style="font-size: 1.1em; color: #C71585;">₹[[${#numbers.formatDecimal(donation.amount ?: 0, 0, 'COMMA', 2, 'POINT')}]]</span></p>
+                        <p><strong>Purpose:</strong> [[${donation.purpose}]]</p>
+                        <p><strong>Date:</strong> [[${#temporals.format(donation.createdAt, 'dd MMM yyyy')}]]</p>
+                        <p><strong>Status:</strong> <span class="badge badge-verified">[[${donation.status}]]</span></p>
+                        
+                        <hr>
+                        <p class="mb-1"><strong>Donor Information:</strong></p>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-user-circle fa-2x me-2 text-muted"></i>
+                            <div>
+                                <p class="mb-0"><strong>[[${donor.fullName}]]</strong></p>
+                                <p class="mb-0"><small class="text-muted">[[${donor.email}]]</small></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div></body></html>

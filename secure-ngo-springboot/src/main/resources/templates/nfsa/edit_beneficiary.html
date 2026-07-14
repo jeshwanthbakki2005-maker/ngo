@@ -1,0 +1,91 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: layout(~{::title}, ~{::content})}">
+
+<head><title th:fragment="title">Edit Beneficiary - NGO Fund Tracker</title></head>
+
+
+
+<body><div th:fragment="content">
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+        <div class="card">
+            <div class="card-header text-center py-4">
+                <i class="fas fa-user-edit fa-3x mb-3 floating-icon" style="color: #C71585;"></i>
+                <h3 class="mb-0">Edit Beneficiary Details</h3>
+                <p class="mb-0 opacity-75">Update beneficiary information</p>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="[[${url_for('nfsa_edit_beneficiary', beneficiary_id=beneficiary.id)}]]">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-user me-2" style="color: #DB7093;"></i>Full Name</label>
+                            <input type="text" class="form-control" name="full_name" required value="[[${beneficiary.fullName}]]" placeholder="Enter full name">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-phone me-2" style="color: #DB7093;"></i>Phone Number</label>
+                            <input type="tel" class="form-control" name="phone" required value="[[${beneficiary.phone}]]" placeholder="+91 9876543210">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-map-marker-alt me-2" style="color: #DB7093;"></i>Address</label>
+                        <textarea class="form-control" name="address" required rows="2" placeholder="Enter complete address">[[${beneficiary.address}]]</textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-tag me-2" style="color: #DB7093;"></i>Need Category</label>
+                            <select class="form-select" name="need_category" required>
+                                <option value="">-- Select Category --</option>
+                                <option value="Education" selected>📚 Education</option>
+                                <option value="Medical" selected>🏥 Medical</option>
+                                <option value="Food & Nutrition" selected>🍽️ Food & Nutrition</option>
+                                <option value="Housing" selected>🏠 Housing</option>
+                                <option value="Livelihood" selected>💼 Livelihood</option>
+                                <option value="Disability Support" selected>♿ Disability Support</option>
+                                <option value="Elderly Care" selected>👴 Elderly Care</option>
+                                <option value="Child Welfare" selected>👶 Child Welfare</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-users me-2" style="color: #DB7093;"></i>Family Members</label>
+                            <input type="number" class="form-control" name="family_members" required min="1" value="[[${beneficiary.familyMembers}]]" placeholder="Number of family members">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-rupee-sign me-2" style="color: #DB7093;"></i>Monthly Income (₹)</label>
+                        <input type="number" class="form-control" name="monthly_income" required min="0" step="100" value="[[${beneficiary.monthlyIncome}]]" placeholder="Monthly household income">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-file-alt me-2" style="color: #DB7093;"></i>Verification Document Type</label>
+                        <select class="form-select" name="verification_document" required>
+                            <option value="">-- Select Document Type --</option>
+                            <option value="Aadhar Card" selected>Aadhar Card</option>
+                            <option value="Ration Card" selected>Ration Card</option>
+                            <option value="BPL Certificate" selected>BPL Certificate</option>
+                            <option value="Income Certificate" selected>Income Certificate</option>
+                            <option value="Medical Certificate" selected>Medical Certificate</option>
+                            <option value="Disability Certificate" selected>Disability Certificate</option>
+                        </select>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Email address cannot be changed. Update other details as needed.
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                        <a th:href="@{/nfsa/dashboard}" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</div></body></html>

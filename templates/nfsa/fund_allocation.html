@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block title %}Fund Allocation - NGO Fund Tracker{% endblock %}
+
+{% block navbar %}
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="{{ url_for('nfsa_dashboard') }}">
+            <i class="fas fa-hand-holding-heart me-2 floating-icon"></i>NGO Fund Tracker
+        </a>
+        <div class="d-flex align-items-center">
+            <span class="text-white me-3"><i class="fas fa-user-tie me-2"></i>{{ name }}</span>
+            <a href="{{ url_for('logout') }}" class="btn btn-light" style="border-radius: 25px;">
+                <i class="fas fa-sign-out-alt me-2"></i>Logout
+            </a>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <div class="sidebar">
+            <h5 class="mb-4" style="color: #C71585;"><i class="fas fa-bars me-2"></i>NFSA Menu</h5>
+            <a href="{{ url_for('nfsa_dashboard') }}" class="sidebar-link">
+                <i class="fas fa-tachometer-alt"></i>Dashboard Overview
+            </a>
+            <a href="{{ url_for('nfsa_fund_allocation') }}" class="sidebar-link active">
+                <i class="fas fa-hand-holding-usd"></i>Fund Allocation
+            </a>
+            <a href="{{ url_for('nfsa_dashboard') }}" class="sidebar-link">
+                <i class="fas fa-user-check"></i>Beneficiary Verification
+            </a>
+            <a href="{{ url_for('nfsa_financial_reports') }}" class="sidebar-link">
+                <i class="fas fa-chart-bar"></i>Financial Reports
+            </a>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-money-bill-transfer me-2"></i>Allocate Funds to Beneficiary
+            </div>
+            <div class="card-body">
+                {% if donations and beneficiaries %}
+                <form method="POST" action="{{ url_for('nfsa_fund_allocation') }}">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-donate me-2" style="color: #DB7093;"></i>Select Donation</label>
+                            <select class="form-select" name="donation_id" required>
+                                <option value="">-- Select a donation --</option>
+                                {% for d in donations %}
+                                <option value="{{ d.id }}">{{ d.transaction_id[:15] }} - ₹{{ "{:,.2f}".format(d.amount - d.allocated_amount) }} available ({{ d.purpose }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-user me-2" style="color: #DB7093;"></i>Select Beneficiary</label>
+                            <select class="form-select" name="beneficiary_id" required>
+                                <option value="">-- Select beneficiary --</option>
+                                {% for b in beneficiaries %}
+                                <option value="{{ b.id }}">{{ b.full_name }} ({{ b.need_category }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-rupee-sign me-2" style="color: #DB7093;"></i>Amount to Allocate</label>
+                            <input type="number" class="form-control" name="amount" required min="1" step="0.01" placeholder="Enter amount">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-bullseye me-2" style="color: #DB7093;"></i>Allocation Purpose</label>
+                            <input type="text" class="form-control" name="purpose" required placeholder="e.g., Medical expenses, Education">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check-circle me-2"></i>Allocate Funds
+                    </button>
+                </form>
+                {% else %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    {% if not donations %}No donations with available funds.{% endif %}
+                    {% if not beneficiaries %}No verified beneficiaries to allocate to.{% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-list me-2"></i>Allocation History
+            </div>
+            <div class="card-body">
+                {% if allocations %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-hashtag me-1"></i>ID</th>
+                                <th><i class="fas fa-user me-1"></i>Beneficiary</th>
+                                <th><i class="fas fa-rupee-sign me-1"></i>Amount</th>
+                                <th><i class="fas fa-bullseye me-1"></i>Purpose</th>
+                                <th><i class="fas fa-calendar me-1"></i>Date</th>
+                                <th><i class="fas fa-info-circle me-1"></i>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for alloc in allocations %}
+                            <tr>
+                                <td>#{{ alloc.id }}</td>
+                                <td>{{ alloc.beneficiary.full_name }}</td>
+                                <td>₹{{ "{:,.2f}".format(alloc.amount) }}</td>
+                                <td>{{ alloc.purpose }}</td>
+                                <td>{{ alloc.created_at.strftime('%d %b %Y') }}</td>
+                                <td>
+                                    {% if alloc.status == 'approved' %}
+                                    <span class="badge badge-verified">Approved</span>
+                                    {% elif alloc.status == 'pending' %}
+                                    <span class="badge badge-pending">Pending</span>
+                                    {% else %}
+                                    <span class="badge badge-rejected">{{ alloc.status }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-folder-open fa-3x mb-3" style="color: #FFB6C1;"></i>
+                    <p class="text-muted">No allocations yet</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

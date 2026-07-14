@@ -1,0 +1,78 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: layout(~{::title}, ~{::content})}">
+
+<head><title th:fragment="title">Fund Tracking - NGO Fund Tracker</title></head>
+
+<body><div th:fragment="content">
+<div class="container py-5">
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6 order-md-2">
+            <div class="text-center">
+                <i class="fas fa-search-dollar fa-8x"
+                    style="color: var(--pink-light); text-shadow: 0 0 20px rgba(219, 112, 147, 0.5);"></i>
+                <i class="fas fa-chart-line fa-4x position-absolute"
+                    style="color: var(--pink-dark); top: 50%; left: 50%; transform: translate(-50%, -50%);"></i>
+            </div>
+        </div>
+        <div class="col-md-6 order-md-1">
+            <h1 class="display-4 fw-bold" style="color: var(--pink-deep);">Fund Tracking</h1>
+            <p class="lead text-muted">Real-time visibility into every donation, from contribution to utilization.</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card h-100 p-4 border-0 shadow-sm">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="rounded-circle p-3 me-3" style="background: var(--pink-light);">
+                        <i class="fas fa-donate fa-2x" style="color: var(--pink-deep);"></i>
+                    </div>
+                    <h4 class="mb-0">Donation Lifecycle</h4>
+                </div>
+                <p>Track your donation through every stage: <strong>Received</strong> &rarr; <strong>Verified</strong>
+                    &rarr; <strong>Allocated</strong> &rarr; <strong>Utilized</strong>. Donors receive real-time updates
+                    as their funds move through the system.</p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100 p-4 border-0 shadow-sm">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="rounded-circle p-3 me-3" style="background: var(--pink-light);">
+                        <i class="fas fa-project-diagram fa-2x" style="color: var(--pink-deep);"></i>
+                    </div>
+                    <h4 class="mb-0">Allocation Mapping</h4>
+                </div>
+                <p>See exactly which beneficiary or project your specific donation was allocated to. We maintain a
+                    strict 1-to-1 mapping of funds to ensure accountability.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card p-5 border-0 shadow-sm" style="background: linear-gradient(to right, #FFF0F5, #FFFFFF);">
+                <h3 class="text-center mb-4" style="color: var(--pink-deep);">Why It Matters</h3>
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <i class="fas fa-check-double fa-3x mb-3 text-success"></i>
+                        <h5>No Leakage</h5>
+                        <p class="small text-muted">Prevents funds from disappearing or being misused.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <i class="fas fa-history fa-3x mb-3 text-primary"></i>
+                        <h5>Audit Trail</h5>
+                        <p class="small text-muted">Every transaction creates an immutable record.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <i class="fas fa-handshake fa-3x mb-3 text-warning"></i>
+                        <h5>Trust</h5>
+                        <p class="small text-muted">Builds confidence between donors and NGOs.</p>
+                    </div>
+                </div>
+                <div class="text-center mt-5">
+                    <a th:href="@{/}" class="btn btn-primary btn-lg">Back to Home</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div></body></html>

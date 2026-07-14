@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{nfsa/nfsa_layout :: layout(~{::title}, ~{::content}, 'dashboard')}">
+<head>
+    <title>Dashboard - Admin Panel</title>
+</head>
+<body>
+<div th:fragment="content">
+<style>
+    .middle-grid{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+    .overview-card .card-body{min-height:0}.overview-card .chart-container{height:190px}
+    .chart-fallback{width:100%;height:100%;display:block}.chart-fallback .grid-line{stroke:#e2e8f0;stroke-width:1;stroke-dasharray:4 4}.chart-fallback .area{fill:url(#donationGradient)}.chart-fallback .line{fill:none;stroke:#2563eb;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}.chart-fallback .point{fill:#fff;stroke:#2563eb;stroke-width:3}
+    .request-overview-body{display:flex!important;align-items:center;justify-content:center;gap:35px;min-height:250px}
+    .request-ring{width:150px;height:150px;border-radius:50%;background:conic-gradient(#10b981 0 50%,#f59e0b 50% 75%,#3b82f6 75% 100%);position:relative;flex:0 0 150px}.request-ring:after{content:"";position:absolute;inset:26px;border-radius:50%;background:#fff}.request-ring-center{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center}.request-ring-center span{font-size:.72rem;color:var(--text-muted)}.request-ring-center strong{font-size:1.25rem}
+    @media(max-width:1100px){.middle-grid{grid-template-columns:1fr}.request-overview-body{min-height:220px}}
+</style>
+<!-- Stats Row -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon users"><i class="fas fa-user-friends"></i></div>
+                        <div class="stat-title">Total Users</div>
+                    </div>
+                    <div class="stat-value" th:text="${total_users ?: 0}">0</div>
+                    <div class="stat-trend trend-up"><i class="fas fa-arrow-up"></i> <span th:text="${total_users != null && total_users > 0 ? '0' : '0'}">0</span> <span class="trend-muted">from last month</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon beneficiaries"><i class="fas fa-shield-heart"></i></div>
+                        <div class="stat-title">Total Beneficiaries</div>
+                    </div>
+                    <div class="stat-value" th:text="${total_beneficiaries ?: 0}">0</div>
+                    <div class="stat-trend trend-up"><i class="fas fa-arrow-up"></i> <span th:text="${total_beneficiaries != null && total_beneficiaries > 0 ? '0' : '0'}">0</span> <span class="trend-muted">from last month</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon donations"><i class="fas fa-rupee-sign"></i></div>
+                        <div class="stat-title">Total Donations</div>
+                    </div>
+                    <div class="stat-value">₹<span th:text="${#numbers.formatDecimal(total_donations ?: 0, 0, 'COMMA', 0, 'POINT')}">0</span></div>
+                    <div class="stat-trend trend-up"><i class="fas fa-arrow-up"></i> <span th:text="${total_donations != null && total_donations > 0 ? '0' : '0'}">0</span> <span class="trend-muted">from last month</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon campaigns"><i class="fas fa-bullhorn"></i></div>
+                        <div class="stat-title">Total Campaigns</div>
+                    </div>
+                    <div class="stat-value" th:text="${total_campaigns ?: 0}">0</div>
+                    <div class="stat-trend trend-up"><i class="fas fa-arrow-up"></i> <span th:text="${total_campaigns != null && total_campaigns > 0 ? '0' : '0'}">0</span> <span class="trend-muted">from last month</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon requests"><i class="fas fa-file-invoice-dollar"></i></div>
+                        <div class="stat-title">Pending Requests</div>
+                    </div>
+                    <div class="stat-value" th:text="${pending_requests ?: 0}">0</div>
+                    <div class="stat-trend trend-down"><i class="fas fa-arrow-down"></i> <span th:text="${pending_requests != null && pending_requests > 0 ? '0' : '0'}">0</span> <span class="trend-muted">from last month</span></div>
+                </div>
+
+            </div>
+
+            <!-- Middle Row -->
+            <div class="middle-grid">
+                <!-- Line Chart -->
+                <div class="dashboard-card overview-card">
+                    <div class="card-header">
+                        <h5 class="card-title">Donation Overview</h5>
+                        <select class="card-select"><option>This Month</option><option>Last Month</option></select>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="donationChart" style="display:none"></canvas>
+                            <svg class="chart-fallback" viewBox="0 0 640 190" preserveAspectRatio="none" aria-label="Donation overview chart">
+                                <defs><linearGradient id="donationGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b82f6" stop-opacity=".32"/><stop offset="1" stop-color="#3b82f6" stop-opacity=".03"/></linearGradient></defs>
+                                <line class="grid-line" x1="8" y1="35" x2="632" y2="35"/><line class="grid-line" x1="8" y1="90" x2="632" y2="90"/><line class="grid-line" x1="8" y1="145" x2="632" y2="145"/>
+                                <path class="area" d="M10 160 C75 145,95 120,150 128 S230 95,285 108 S365 55,425 78 S520 35,630 45 L630 180 L10 180 Z"/><path class="line" d="M10 160 C75 145,95 120,150 128 S230 95,285 108 S365 55,425 78 S520 35,630 45"/>
+                                <circle class="point" cx="10" cy="160" r="5"/><circle class="point" cx="150" cy="128" r="5"/><circle class="point" cx="285" cy="108" r="5"/><circle class="point" cx="425" cy="78" r="5"/><circle class="point" cx="630" cy="45" r="5"/>
+                            </svg>
+                        </div>
+                        <div class="chart-stats">
+                            <div class="c-stat">
+                                <span class="c-stat-label">Total Amount</span>
+                                <span class="c-stat-value">₹ <span th:text="${#numbers.formatDecimal(total_donations ?: 0, 0, 'COMMA', 0, 'POINT')}">0</span></span>
+                            </div>
+                            <div class="c-stat">
+                                <span class="c-stat-label">Allocated Amount</span>
+                                <span class="c-stat-value">₹ <span th:text="${#numbers.formatDecimal(total_allocated ?: 0, 0, 'COMMA', 0, 'POINT')}">0</span></span>
+                            </div>
+                            <div class="c-stat">
+                                <span class="c-stat-label">Pending Allocations</span>
+                                <span class="c-stat-value" th:text="${pending_allocations ?: 0}">0</span>
+                            </div>
+                            <div class="c-stat">
+                                <span class="c-stat-label">Allocation Rate</span>
+                                <span class="c-stat-value text-success"><i class="fas fa-arrow-up"></i> <span th:text="${#numbers.formatDecimal(percent, 0, 'COMMA', 0, 'POINT')}">0</span>%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Donut Chart -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h5 class="card-title">Requests Overview</h5>
+                        <select class="card-select"><option>This Month</option></select>
+                    </div>
+                    <div class="card-body request-overview-body">
+                        <div class="request-ring">
+                            <canvas id="requestsChart" style="display:none"></canvas>
+                            <div class="request-ring-center"><span>Total</span><strong th:text="${total_campaigns ?: 0}">0</strong></div>
+                        </div>
+                        <div class="donut-legend flex-1">
+                            <div class="legend-item">
+                                <div class="legend-left"><div class="legend-dot" style="background:#10b981"></div> Active</div>
+                                <div class="legend-val" th:text="${active_campaigns ?: 0}">0</div>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-left"><div class="legend-dot" style="background:#f59e0b"></div> Pending</div>
+                                <div class="legend-val" th:text="${pending_requests ?: 0}">0</div>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-left"><div class="legend-dot" style="background:#3b82f6"></div> Resolved</div>
+                                <div class="legend-val" th:text="${resolved_reports ?: 0}">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alerts -->
+                <div class="dashboard-card">
+                    <div class="card-header purple">
+                        <h5 class="card-title"><i class="fas fa-bell"></i> Emergency Alerts</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert-list">
+                            <div style="font-weight:700;font-size:.78rem;color:#dc2626;margin-bottom:8px;"><i class="fas fa-triangle-exclamation"></i> Ongoing Disaster Situations</div>
+                            <div class="alert-item" style="display:flex;align-items:center;gap:10px" th:each="report : ${ongoingDisasters}">
+                                <img th:if="${report.photoBase64 != null and !#strings.isEmpty(report.photoBase64)}" th:src="|data:image/jpeg;base64,${report.photoBase64}|" alt="Disaster" style="width:58px;height:58px;flex:0 0 58px;object-fit:cover;border-radius:9px;box-shadow:0 2px 7px rgba(15,23,42,.18)">
+                                <img th:unless="${report.photoBase64 != null and !#strings.isEmpty(report.photoBase64)}" th:src="${#strings.equalsIgnoreCase(report.disasterType,'earthquake') ? '/images/earthquake_disaster.png' : (#strings.equalsIgnoreCase(report.disasterType,'cyclone') ? '/images/cyclone_disaster.png' : '/images/flood_disaster.png')}" alt="Disaster" style="width:58px;height:58px;flex:0 0 58px;object-fit:cover;border-radius:9px;box-shadow:0 2px 7px rgba(15,23,42,.18)">
+                                <div style="min-width:0"><div class="alert-title"><i class="fas fa-circle"></i> <span th:text="|${report.disasterType} Emergency in ${report.location}|">Disaster Emergency</span></div>
+                                <p class="alert-desc"><span th:text="|${report.severity} priority • ${report.familiesAffected ?: 0} families • ₹${#numbers.formatDecimal(report.requiredAmount ?: 0,0,'COMMA',0,'POINT')} required|">Emergency details</span></p></div>
+                            </div>
+                            <div class="alert-item" th:if="${ongoingDisasters == null or #lists.isEmpty(ongoingDisasters)}"><p class="alert-desc">No ongoing disaster situations.</p></div>
+
+                            <div style="font-weight:700;font-size:.78rem;color:#059669;margin:14px 0 8px;"><i class="fas fa-box-open"></i> My Material Requests</div>
+                            <div class="alert-item" style="border-left-color:#10b981;background:#ecfdf5;display:flex;align-items:center;gap:10px" th:each="request : ${materialRequests}">
+                                <div style="width:48px;height:48px;flex:0 0 48px;border-radius:9px;background:#d1fae5;color:#059669;display:flex;align-items:center;justify-content:center;font-size:1.25rem"><i class="fas fa-box-open"></i></div>
+                                <div style="min-width:0"><div class="alert-title" style="color:#047857"><i class="fas fa-box"></i> <span th:text="|Request #${request.id} - ${request.materialType}|">Material Request</span></div>
+                                <p class="alert-desc"><span th:text="|${request.beneficiaryName ?: 'Beneficiary'} • ${request.quantity} items • ${request.urgency} • ${request.status}|">Request details</span></p></div>
+                            </div>
+                            <div class="alert-item" th:if="${materialRequests == null or #lists.isEmpty(materialRequests)}"><p class="alert-desc">No material requests submitted.</p></div>
+                        </div>
+                        <div style="text-align:center;margin-top:16px;">
+                            <a th:href="@{/nfsa/campaigns}" style="font-size:0.8rem;font-weight:600;color:var(--primary);text-decoration:none;">View All Campaigns &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Campaigns -->
+                <div class="dashboard-card">
+                    <div class="card-header"><h5 class="card-title"><i class="fas fa-bullhorn" style="color:#ec4899"></i> Active Campaigns</h5><a th:href="@{/nfsa/campaigns}" class="card-action" style="color:#ec4899">View All</a></div>
+                    <div class="card-body">
+                        <div th:each="campaign : ${dashboardCampaigns}" style="display:grid;grid-template-columns:68px minmax(0,1fr) 145px;gap:12px;align-items:center;margin-bottom:14px">
+                            <img th:if="${campaign.photoBase64 != null and !#strings.isEmpty(campaign.photoBase64)}" th:src="|data:image/jpeg;base64,${campaign.photoBase64}|" alt="Campaign" style="width:68px;height:60px;object-fit:cover;border-radius:9px">
+                            <img th:unless="${campaign.photoBase64 != null and !#strings.isEmpty(campaign.photoBase64)}" th:src="${#strings.equalsIgnoreCase(campaign.disasterType,'earthquake') ? '/images/earthquake_disaster.png' : (#strings.equalsIgnoreCase(campaign.disasterType,'cyclone') ? '/images/cyclone_disaster.png' : '/images/flood_disaster.png')}" alt="Campaign" style="width:68px;height:60px;object-fit:cover;border-radius:9px">
+                            <div style="min-width:0"><div style="font-size:.78rem;font-weight:700;text-transform:capitalize" th:text="|${campaign.disasterType} Relief in ${campaign.location}|">Relief Campaign</div><div style="font-size:.67rem;color:var(--text-muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" th:text="${campaign.description ?: 'Urgent relief support required.'}">Campaign details</div></div>
+                            <div><div style="font-size:.68rem;font-weight:700;text-align:right;margin-bottom:6px">&#8377;<span th:text="${#numbers.formatDecimal(campaign.amountRaised ?: 0,0,'COMMA',0,'POINT')}">0</span> / &#8377;<span th:text="${#numbers.formatDecimal(campaign.requiredAmount ?: 0,0,'COMMA',0,'POINT')}">0</span></div><div style="height:5px;background:#fce7f3;border-radius:10px;overflow:hidden"><div th:style="|width:${campaign.requiredAmount != null and campaign.requiredAmount > 0 ? T(java.lang.Math).min(100, (campaign.amountRaised ?: 0) * 100 / campaign.requiredAmount) : 0}%;height:100%;background:#ec4899;border-radius:10px|"></div></div><div style="font-size:.67rem;font-weight:700;text-align:right;margin-top:4px" th:text="|${campaign.requiredAmount != null and campaign.requiredAmount > 0 ? #numbers.formatDecimal(T(java.lang.Math).min(100, (campaign.amountRaised ?: 0) * 100 / campaign.requiredAmount),0,0) : 0}%|">0%</div></div>
+                        </div>
+                        <div th:if="${dashboardCampaigns == null or #lists.isEmpty(dashboardCampaigns)}" style="text-align:center;color:var(--text-muted);padding:24px">No active campaigns.</div>
+                        <a th:href="@{/nfsa/campaigns}" style="display:block;text-align:center;border:1px solid #ec4899;border-radius:7px;padding:8px;color:#ec4899;font-size:.72rem;font-weight:700;text-decoration:none">Browse All Campaigns <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Row -->
+            <div class="bottom-grid">
+                <!-- Recent Relief Requests -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h5 class="card-title">Recent Relief Requests</h5>
+                        <a href="#" class="card-action border rounded px-3 py-1">View All</a>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive m-0">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Request ID</th>
+                                        <th>Beneficiary</th>
+                                        <th>Disaster Type</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Submitted On</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="report : ${recent_reports}">
+                                        <td th:text="${'REQ' + report.id}">REQ1234</td>
+                                        <td th:text="${report.reportedByBeneficiaryId != null ? 'Beneficiary #' + report.reportedByBeneficiaryId : 'N/A'}">N/A</td>
+                                        <td th:text="${report.disasterType}">Flood</td>
+                                        <td>₹ <span th:text="${#numbers.formatDecimal(report.requiredAmount ?: 0, 0, 'COMMA', 0, 'POINT')}">0</span></td>
+                                        <td th:text="${#strings.capitalize(report.status)}">Pending</td>
+                                        <td th:text="${#temporals.format(report.createdAt, 'dd MMM yyyy')}">12 Jul 2026</td>
+                                    </tr>
+                                    <tr th:if="${recent_reports == null or #lists.isEmpty(recent_reports)}">
+                                        <td colspan="6">
+                                            <div class="empty-state">No recent relief requests available.</div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Donations -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h5 class="card-title">Recent Donations</h5>
+                        <a href="#" class="card-action border rounded px-3 py-1">View All</a>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive m-0">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Donor</th>
+                                        <th>Amount</th>
+                                        <th>Payment Method</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="donation, iterStat : ${recent_donations}" th:if="${iterStat.index < 5}">
+                                        <td th:text="${donation.donorId != null ? 'Donor #' + donation.donorId : 'Anonymous'}">Helping Hands NGO</td>
+                                        <td>₹ <span th:text="${#numbers.formatDecimal(donation.amount, 0, 'COMMA', 0, 'POINT')}">50,000</span></td>
+                                        <td>UPI</td>
+                                        <td th:text="${#temporals.format(donation.createdAt, 'dd MMM yyyy')}">12 Jul 2026</td>
+                                    </tr>
+                                    <tr th:if="${recent_donations == null or #lists.isEmpty(recent_donations)}">
+                                        <td colspan="4">
+                                            <div class="empty-state">No recent donations available.</div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Summary -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h5 class="card-title">System Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="summary-list">
+                            <div class="summary-item">
+                                <div class="s-left"><div class="s-icon" style="background:#eff6ff;color:#3b82f6"><i class="fas fa-user"></i></div> Total Users</div>
+                                <div class="s-right" th:text="${total_users ?: 0}">0</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="s-left"><div class="s-icon" style="background:#ecfdf5;color:#10b981"><i class="fas fa-bullhorn"></i></div> Total Campaigns</div>
+                                <div class="s-right" th:text="${total_campaigns ?: 0}">0</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="s-left"><div class="s-icon" style="background:#fef3c7;color:#f59e0b"><i class="fas fa-rupee-sign"></i></div> Total Donations</div>
+                                <div class="s-right">₹ <span th:text="${#numbers.formatDecimal(total_donations ?: 0, 0, 'COMMA', 0, 'POINT')}">0</span></div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="s-left"><div class="s-icon" style="background:#fef2f2;color:#ef4444"><i class="fas fa-exclamation-triangle"></i></div> Pending Requests</div>
+                                <div class="s-right" th:text="${pending_requests ?: 0}">0</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="s-left"><div class="s-icon" style="background:#f3e8ff;color:#8b5cf6"><i class="fas fa-users"></i></div> NFSA Admins</div>
+                                <div class="s-right" th:text="${total_admins ?: 0}">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:24px;color:var(--text-muted);font-size:0.75rem;padding-top:16px;border-top:1px solid var(--border-color)">
+                <div>&copy; 2026 Secure Disaster Relief Donation Platform. All rights reserved.</div>
+                <div>Version 1.0.0</div>
+            </div>
+</div>
+</body>
+</html>

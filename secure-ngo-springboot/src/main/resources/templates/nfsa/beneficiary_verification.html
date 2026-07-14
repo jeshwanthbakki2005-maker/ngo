@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{nfsa/nfsa_layout :: layout(~{::title}, ~{::content}, 'beneficiaries')}">
+<head>
+    <title>Beneficiary Verification - Admin Panel</title>
+</head>
+<body>
+<div th:fragment="content">
+<style>
+    /* ── Flash Messages ── */
+    .flash-success { background: #d1fae5; border: 1px solid #6ee7b7; color: #065f46; padding: 12px 18px; border-radius: 10px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; font-size: 0.875rem; font-weight: 500; }
+    .flash-error   { background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; padding: 12px 18px; border-radius: 10px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; font-size: 0.875rem; font-weight: 500; }
+
+    /* ── Mini Stats Row ── */
+    .stats-row { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+    .mini-stat { background: #fff; border-radius: 12px; border: 1px solid var(--border-color); padding: 16px 20px; display: flex; align-items: center; gap: 14px; flex: 1; min-width: 150px; box-shadow: 0 1px 3px rgba(0,0,0,.03); }
+    .mini-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1rem; flex-shrink: 0; }
+    .mini-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+    .mini-value { font-size: 1.5rem; font-weight: 700; color: var(--text-main); line-height: 1.2; }
+
+    /* ── Filters ── */
+    .filters-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    .search-wrap { position: relative; flex: 1; min-width: 200px; }
+    .search-wrap i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.85rem; }
+    .search-inp { width: 100%; padding: 9px 16px 9px 36px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.85rem; outline: none; transition: 0.2s; }
+    .search-inp:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    .filter-select { padding: 9px 14px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.85rem; outline: none; color: var(--text-main); background: #fff; cursor: pointer; }
+
+    /* ── Table Card ── */
+    .table-card { background: #fff; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,.03); overflow: hidden; }
+    .table-card-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border-color); }
+    .table-card-title { font-size: 0.95rem; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 12px 16px; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border-color); white-space: nowrap; background: #f8fafc; }
+    td { padding: 13px 16px; font-size: 0.82rem; color: var(--text-main); border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+
+    /* ── User Cell ── */
+    .user-cell { display: flex; align-items: center; gap: 10px; }
+    .user-cell-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
+    .user-cell-name { font-size: 0.85rem; font-weight: 600; color: var(--text-main); }
+    .user-cell-email { font-size: 0.75rem; color: var(--text-muted); }
+
+    /* ── Badges ── */
+    .badge-verified { background: #d1fae5; color: #065f46; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
+    .badge-pending  { background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
+
+    /* ── Action Buttons ── */
+    .action-group { display: flex; gap: 6px; align-items: center; }
+    .btn-view    { background: #eff6ff; color: var(--primary); border: 1px solid #bfdbfe; padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; transition: .15s; }
+    .btn-view:hover { background: var(--primary); color: white; }
+    .btn-approve { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; transition: .15s; display: inline-flex; align-items: center; gap: 4px; }
+    .btn-approve:hover { background: #10b981; color: white; }
+    .btn-reject  { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; transition: .15s; display: inline-flex; align-items: center; gap: 4px; }
+    .btn-reject:hover { background: #ef4444; color: white; }
+
+    /* ── Detail Modal ── */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,.6); z-index: 9999; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal-box { background: white; border-radius: 16px; width: 560px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 30px 80px rgba(0,0,0,.2); animation: modalIn .2s ease; }
+    @keyframes modalIn { from { opacity:0; transform: scale(.96) translateY(-12px); } to { opacity:1; transform: scale(1) translateY(0); } }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border-color); }
+    .modal-header h5 { font-size: 1rem; font-weight: 700; color: var(--text-main); margin: 0; display: flex; align-items: center; gap: 8px; }
+    .modal-close { background: none; border: none; color: var(--text-muted); font-size: 1rem; cursor: pointer; }
+    .modal-body { padding: 24px; }
+    .modal-avatar { width: 64px; height: 64px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.5rem; margin: 0 auto 12px; }
+    .modal-name { text-align: center; margin-bottom: 20px; }
+    .modal-name h5 { font-size: 1.1rem; font-weight: 700; margin: 0 0 6px; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .detail-item { display: flex; flex-direction: column; gap: 4px; background: #f8fafc; border-radius: 8px; padding: 12px; }
+    .detail-full { grid-column: 1 / -1; }
+    .detail-label { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 5px; }
+    .detail-value { font-size: 0.88rem; color: var(--text-main); font-weight: 500; }
+    .modal-footer { display: flex; gap: 10px; justify-content: flex-end; padding: 16px 24px; border-top: 1px solid var(--border-color); }
+    .btn-modal-cancel { background: #f1f5f9; color: var(--text-main); border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.875rem; }
+</style>
+<!-- Flash Messages -->
+        <div class="flash-success" th:if="${successMessage}">
+            <i class="fas fa-check-circle"></i> <span th:text="${successMessage}"></span>
+        </div>
+        <div class="flash-error" th:if="${errorMessage}">
+            <i class="fas fa-times-circle"></i> <span th:text="${errorMessage}"></span>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="mini-stat">
+                <div class="mini-icon" style="background:#6366f1;"><i class="fas fa-users"></i></div>
+                <div>
+                    <div class="mini-label">Total Beneficiaries</div>
+                    <div class="mini-value" th:text="${#lists.size(beneficiaries ?: {})}">0</div>
+                </div>
+            </div>
+            <div class="mini-stat">
+                <div class="mini-icon" style="background:var(--warning);"><i class="fas fa-clock"></i></div>
+                <div>
+                    <div class="mini-label">Pending Verification</div>
+                    <div class="mini-value" th:text="${beneficiaries != null ? #lists.size(beneficiaries.?[!isVerified]) : 0}">0</div>
+                </div>
+            </div>
+            <div class="mini-stat">
+                <div class="mini-icon" style="background:var(--success);"><i class="fas fa-check-circle"></i></div>
+                <div>
+                    <div class="mini-label">Verified</div>
+                    <div class="mini-value" th:text="${beneficiaries != null ? #lists.size(beneficiaries.?[isVerified]) : 0}">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-bar">
+            <div class="search-wrap">
+                <i class="fas fa-search"></i>
+                <input type="text" class="search-inp" id="searchInput" placeholder="Search by name, email, or phone...">
+            </div>
+            <select class="filter-select" id="statusFilter">
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="verified">Verified</option>
+            </select>
+            <select class="filter-select" id="categoryFilter">
+                <option value="">All Categories</option>
+                <option value="medical">Medical</option>
+                <option value="food">Food</option>
+                <option value="shelter">Shelter</option>
+                <option value="education">Education</option>
+                <option value="disaster">Disaster Relief</option>
+            </select>
+        </div>
+
+        <!-- Table -->
+        <div class="table-card">
+            <div class="table-card-header">
+                <div class="table-card-title">
+                    <i class="fas fa-list" style="color:var(--primary);"></i> All Beneficiaries
+                </div>
+                <span style="font-size:0.78rem;color:var(--text-muted);">
+                    Showing <span id="rowCount" th:text="${#lists.size(beneficiaries ?: {})}">0</span> beneficiaries
+                </span>
+            </div>
+            <div style="overflow-x:auto;">
+                <table id="beneficiaryTable">
+                    <thead>
+                        <tr>
+                            <th>Beneficiary</th>
+                            <th>Phone</th>
+                            <th>Need Category</th>
+                            <th>Family Size</th>
+                            <th>Monthly Income</th>
+                            <th>Status</th>
+                            <th>Registered On</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="b : ${beneficiaries}"
+                            th:attr="data-id=${b.id}, data-name=${b.fullName}, data-email=${b.email}, data-phone=${b.phone}, data-address=${b.address}, data-category=${b.needCategory}, data-family=${b.familyMembers}, data-income=${b.monthlyIncome}, data-verified=${b.isVerified}, data-status=${b.isVerified ? 'verified' : 'pending'}"
+                            class="beneficiary-row">
+                            <td>
+                                <div class="user-cell">
+                                    <div class="user-cell-avatar" th:text="${#strings.substring(b.fullName, 0, 1)}">A</div>
+                                    <div>
+                                        <div class="user-cell-name" th:text="${b.fullName}">Full Name</div>
+                                        <div class="user-cell-email" th:text="${b.email}">email@email.com</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td th:text="${b.phone}">+91 XXXXX</td>
+                            <td th:text="${b.needCategory}">Category</td>
+                            <td th:text="${b.familyMembers + ' members'}">1</td>
+                            <td>₹ <span th:text="${#numbers.formatDecimal(b.monthlyIncome ?: 0, 0, 'COMMA', 0, 'POINT')}">0</span></td>
+                            <td>
+                                <span class="badge badge-verified" th:if="${b.isVerified}"><i class="fas fa-circle" style="font-size:0.5rem;"></i> Verified</span>
+                                <span class="badge badge-pending" th:unless="${b.isVerified}"><i class="fas fa-circle" style="font-size:0.5rem;"></i> Pending</span>
+                            </td>
+                            <td th:text="${#temporals.format(b.createdAt, 'dd MMM yyyy')}">-</td>
+                            <td>
+                                <div class="action-group">
+                                    <button class="btn-view" onclick="showDetail(this.closest('tr'))">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <!-- Pending: show Approve + Reject -->
+                                    <th:block th:unless="${b.isVerified}">
+                                        <form th:action="@{/nfsa/beneficiary-verify}" method="post" style="display:inline;">
+                                            <input type="hidden" name="beneficiaryId" th:value="${b.id}">
+                                            <input type="hidden" name="verify" value="true">
+                                            <button type="submit" class="btn-approve" title="Approve this beneficiary">
+                                                <i class="fas fa-check"></i> Approve
+                                            </button>
+                                        </form>
+                                        <form th:action="@{/nfsa/beneficiary-verify}" method="post" style="display:inline;">
+                                            <input type="hidden" name="beneficiaryId" th:value="${b.id}">
+                                            <input type="hidden" name="verify" value="false">
+                                            <button type="submit" class="btn-reject" title="Reject this beneficiary">
+                                                <i class="fas fa-times"></i> Reject
+                                            </button>
+                                        </form>
+                                    </th:block>
+                                    <!-- Verified: show Revoke only -->
+                                    <th:block th:if="${b.isVerified}">
+                                        <form th:action="@{/nfsa/beneficiary-verify}" method="post" style="display:inline;">
+                                            <input type="hidden" name="beneficiaryId" th:value="${b.id}">
+                                            <input type="hidden" name="verify" value="false">
+                                            <button type="submit" class="btn-reject" title="Revoke verification">
+                                                <i class="fas fa-undo"></i> Revoke
+                                            </button>
+                                        </form>
+                                    </th:block>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${beneficiaries == null or #lists.isEmpty(beneficiaries)}">
+                            <td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted);">
+                                <i class="fas fa-inbox fa-2x" style="display:block;margin-bottom:10px;opacity:0.4;"></i>
+                                No beneficiaries registered yet.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" id="detailModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h5><i class="fas fa-user-circle" style="color:var(--primary);"></i> Beneficiary Details</h5>
+            <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-avatar" id="modalAvatar">A</div>
+            <div class="modal-name">
+                <h5 id="modalName">-</h5>
+                <span id="modalStatusBadge"></span>
+            </div>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <span class="detail-label"><i class="fas fa-envelope"></i> Email</span>
+                    <span class="detail-value" id="modalEmail">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label"><i class="fas fa-phone"></i> Phone</span>
+                    <span class="detail-value" id="modalPhone">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label"><i class="fas fa-tag"></i> Need Category</span>
+                    <span class="detail-value" id="modalCategory">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label"><i class="fas fa-users"></i> Family Members</span>
+                    <span class="detail-value" id="modalFamily">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label"><i class="fas fa-rupee-sign"></i> Monthly Income</span>
+                    <span class="detail-value" id="modalIncome">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label"><i class="fas fa-shield-alt"></i> Verification Status</span>
+                    <span class="detail-value" id="modalStatus">-</span>
+                </div>
+                <div class="detail-item detail-full">
+                    <span class="detail-label"><i class="fas fa-map-marker-alt"></i> Address</span>
+                    <span class="detail-value" id="modalAddress">-</span>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer" id="modalFooter">
+            <button class="btn-modal-cancel" onclick="closeModal()">Close</button>
+</div>
+</body>
+</html>

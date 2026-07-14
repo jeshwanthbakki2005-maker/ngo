@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{kk/dashboard_layout :: layout(~{::title}, ~{::content}, 'settings')}">
+<head>
+    <title>Settings - NGO Fund Tracker</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="page-header">
+        <h2>Settings</h2>
+        <p>Manage your account preferences and security.</p>
+    </div>
+    <div class="empty-state">
+        <div class="empty-icon"><i class="fas fa-cog"></i></div>
+        <h3>Account Settings</h3>
+        <p>Profile management, password changes, and notification preferences will be available here.</p>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: layout(~{::title}, ~{::content})}">
+
+<head><title th:fragment="title">Transparency - NGO Fund Tracker</title></head>
+
+<body><div th:fragment="content">
+<div class="container py-5">
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6">
+            <h1 class="display-4 fw-bold" style="color: var(--pink-deep);">Total Transparency</h1>
+            <p class="lead text-muted">Building trust through openness. See where every penny goes.</p>
+            <a th:href="@{/}" class="btn btn-outline-secondary mt-3"><i
+                    class="fas fa-arrow-left me-2"></i>Back to Home</a>
+        </div>
+        <div class="col-md-6">
+            <img src="https://img.freepik.com/free-vector/business-transparency-concept-illustration_114360-4966.jpg?w=826&t=st=1708876000~exp=1708876600~hmac=..."
+                alt="Transparency Illustration" class="img-fluid rounded-3 shadow-sm" style="opacity: 0.9;">
+            <!-- Note: Using a placeholder-like structure or just icons if image not available. Replacing with Icon structure for reliability -->
+            <div class="text-center p-5 bg-white rounded shadow-sm">
+                <i class="fas fa-glasses fa-6x" style="color: var(--pink-dark);"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm p-4">
+                <div class="d-flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-file-invoice fa-3x text-info"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h4>Utilization Reports</h4>
+                        <p class="text-muted">Beneficiaries submit detailed utilization reports, including receipts and
+                            proof of purchase, for every fund allocated to them. These reports are accessible to the
+                            donors who funded them.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm p-4">
+                <div class="d-flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-network-wired fa-3x text-warning"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h4>End-to-End Visibility</h4>
+                        <p class="text-muted">From the moment a donation enters the system to the moment it is spent on
+                            goods or services, the entire chain of custody is visible. No black boxes.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm p-4">
+                <div class="d-flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-balance-scale fa-3x text-success"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h4>Fair Allocation</h4>
+                        <p class="text-muted">Our algorithms and admin oversight ensure that funds are distributed
+                            fairly based on need and urgency, preventing hoarding or bias.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm p-4">
+                <div class="d-flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-bullhorn fa-3x text-danger"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h4>Public Accountability</h4>
+                        <p class="text-muted">Key metrics and overall fund distribution statistics are available to the
+                            public, ensuring the NGO remains accountable to society.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div></body></html>

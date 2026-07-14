@@ -1,0 +1,247 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: layout(~{::title}, ~{::content})}">
+
+<head><title th:fragment="title">KK Signup - NGO Fund Tracker</title></head>
+
+<body><div th:fragment="content">
+<div class="kk-signup-page">
+    <div class="row gx-0 align-items-center">
+        <div class="col-lg-5 signup-panel-left d-none d-lg-block">
+            <div class="panel-left-inner">
+                <div class="brand-badge">
+                    <i class="fas fa-hand-holding-heart"></i>
+                    <span>Hope & Help</span>
+                </div>
+                <h1>Together We Can Rebuild<br/><span>Lives</span></h1>
+                <p>Join hands with us to bring hope, relief and recovery to communities affected by natural disasters.</p>
+                <div class="benefit-row">
+                    <div class="benefit-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <div>
+                            <strong>Secure Donations</strong>
+                            <small>Your donation is safe and secure with us.</small>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-badge-check"></i>
+                        <div>
+                            <strong>Verified Platform</strong>
+                            <small>Trusted by thousands of donors across the world.</small>
+                        </div>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-chart-line"></i>
+                        <div>
+                            <strong>100% Transparency</strong>
+                            <small>We ensure transparency in fund utilization and impact.</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <strong>250K+</strong>
+                        <span>People Helped</span>
+                    </div>
+                    <div class="stat-card">
+                        <strong>₹50Cr+</strong>
+                        <span>Funds Raised</span>
+                    </div>
+                    <div class="stat-card">
+                        <strong>120+</strong>
+                        <span>Relief Missions</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-7 signup-panel-right">
+            <div class="card signup-card shadow-sm">
+                <div class="card-body p-5">
+                    <div class="signup-card-header text-center mb-4">
+                        <div class="signup-icon"><i class="fas fa-user-plus"></i></div>
+                        <h2 class="mb-2">Create Your KK Account</h2>
+                        <p class="text-muted">Sign up to access KK support services</p>
+                    </div>
+                    <form method="POST" th:action="@{/kk/signup}">
+                        <div th:if="${error != false}" class="alert alert-danger">[[${error}]]</div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" class="form-control" name="full_name" required placeholder="Enter your full name">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" class="form-control" name="email" required placeholder="Enter your email">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Mobile Number</label>
+                                <input type="tel" class="form-control" name="phone" required placeholder="Enter mobile number">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Password</label>
+                                <input type="password" class="form-control" name="password" required minlength="12" maxlength="72" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])[^\s]{12,72}" title="12+ characters with uppercase, lowercase, number and special character; no spaces" placeholder="Strong password (12+ characters)">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Organization</label>
+                                <input type="text" class="form-control" name="organization" placeholder="Enter organization name">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">City</label>
+                                <input type="text" class="form-control" name="city" placeholder="Enter your city">
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check bg-light border rounded-3 p-3">
+                                    <input class="form-check-input" type="checkbox" id="agreeTerms" name="terms" required>
+                                    <label class="form-check-label ms-2" for="agreeTerms">I agree to the <a href="#" class="text-decoration-none">Terms & Conditions</a> and <a href="#" class="text-decoration-none">Privacy Policy</a></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Register</button>
+                        </div>
+                    </form>
+                    <div class="text-center mt-4">
+                        <span class="text-muted">OR</span>
+                        <p class="mt-3 mb-0">Already have an account? <a th:href="@{/kk/login}" class="fw-semibold" style="color:#C71585;">Sign In</a></p>
+                    </div>
+                    <div class="secure-note mt-4 p-3 rounded-3 bg-light border">
+                        <i class="fas fa-lock me-2 text-primary"></i>
+                        <span>Your information is secure with us. We never share your details with anyone.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<style>
+    .kk-signup-page .signup-panel-left {
+        min-height: calc(100vh - 120px);
+        background: linear-gradient(180deg, rgba(25, 15, 64, 0.95), rgba(199, 21, 133, 0.95)), url('https://images.unsplash.com/photo-1526705573255-9e16fa83bbf4?auto=format&fit=crop&w=1000&q=80') center/cover no-repeat;
+        color: white;
+        padding: 60px 40px;
+    }
+    .kk-signup-page .panel-left-inner {
+        max-width: 420px;
+    }
+    .kk-signup-page .brand-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255,255,255,0.12);
+        padding: 10px 16px;
+        border-radius: 999px;
+        margin-bottom: 30px;
+        font-weight: 700;
+    }
+    .kk-signup-page .brand-badge i {
+        font-size: 1.1rem;
+    }
+    .kk-signup-page h1 {
+        font-size: 3rem;
+        line-height: 1.05;
+        margin-bottom: 20px;
+        font-weight: 800;
+    }
+    .kk-signup-page h1 span {
+        color: #FFA500;
+    }
+    .kk-signup-page p {
+        font-size: 1rem;
+        line-height: 1.8;
+        opacity: 0.95;
+        margin-bottom: 30px;
+    }
+    .kk-signup-page .benefit-row {
+        display: grid;
+        gap: 18px;
+        margin-bottom: 35px;
+    }
+    .kk-signup-page .benefit-item {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 14px;
+        align-items: flex-start;
+    }
+    .kk-signup-page .benefit-item i {
+        font-size: 1.4rem;
+        color: #FFD166;
+        margin-top: 5px;
+    }
+    .kk-signup-page .benefit-item strong {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 0.95rem;
+    }
+    .kk-signup-page .benefit-item small {
+        color: rgba(255,255,255,0.85);
+    }
+    .kk-signup-page .stats-row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+    }
+    .kk-signup-page .stat-card {
+        background: rgba(255,255,255,0.15);
+        padding: 22px 18px;
+        border-radius: 20px;
+        text-align: center;
+        border: 1px solid rgba(255,255,255,0.14);
+    }
+    .kk-signup-page .stat-card strong {
+        font-size: 1.35rem;
+        display: block;
+        margin-bottom: 8px;
+    }
+    .kk-signup-page .stat-card span {
+        font-size: 0.9rem;
+        color: rgba(255,255,255,0.85);
+    }
+    .kk-signup-page .signup-panel-right {
+        min-height: calc(100vh - 120px);
+        display: flex;
+        align-items: center;
+        padding: 60px 40px;
+        background: #F9F2F6;
+    }
+    .kk-signup-page .signup-card {
+        border-radius: 30px;
+    }
+    .signup-card-header .signup-icon {
+        width: 84px;
+        height: 84px;
+        background: linear-gradient(135deg, #DB7093, #C71585);
+        border-radius: 22px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        margin: 0 auto 18px;
+        font-size: 1.75rem;
+    }
+    .signup-card-header h2 {
+        font-size: 1.95rem;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+    .signup-card-header p {
+        margin-bottom: 0;
+    }
+    .secure-note {
+        font-size: 0.95rem;
+        color: #444;
+    }
+    .secure-note i {
+        color: #DB7093;
+    }
+    @media (max-width: 991px) {
+        .kk-signup-page .signup-panel-right,
+        .kk-signup-page .signup-panel-left {
+            padding: 30px 20px;
+        }
+    }
+    @media (max-width: 767px) {
+        .kk-signup-page h1 { font-size: 2.4rem; }
+        .kk-signup-page .stats-row { grid-template-columns: 1fr; }
+    }
+</style>
+</div></body>
+</html>

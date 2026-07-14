@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}NGO Fund Tracker - Home{% endblock %}
+
+{% block navbar %}
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="{{ url_for('home') }}">
+            <i class="fas fa-hand-holding-heart me-2 floating-icon"></i>NGO Fund Tracker
+        </a>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <i class="fas fa-globe fa-4x mb-4 floating-icon"></i>
+    <h1 class="display-4 fw-bold">Secure NGO Donation Tracking</h1>
+    <p class="lead">Transparent Fund Utilization Monitoring System</p>
+    <p class="mb-0"><i class="fas fa-shield-alt me-2"></i>JWT Secured | <i class="fas fa-sync me-2"></i>Synchronized |
+        <i class="fas fa-chart-line me-2"></i>Transparent</p>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-6 offset-md-3">
+        <div class="card h-100 text-center p-4">
+            <div class="feature-icon">
+                <i class="fas fa-user-tie"></i>
+            </div>
+            <h3 class="text-pink-deep">Financial Administrator</h3>
+            <p class="text-muted">Nonprofit Financial System Administrator (NFSA) - Manage donations, verify users,
+                allocate funds, and generate reports.</p>
+            <div class="d-flex gap-2 justify-content-center mt-auto">
+                <a href="{{ url_for('nfsa_signup') }}" class="btn btn-primary">
+                    <i class="fas fa-user-plus me-2"></i>Sign Up
+                </a>
+                <a href="{{ url_for('nfsa_login') }}" class="btn btn-outline-primary"
+                    style="border-radius: 25px; border: 2px solid #DB7093; color: #DB7093;">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-12">
+        <h2 class="text-center mb-4" style="color: #C71585;">
+            <i class="fas fa-star me-2 pulse-icon"></i>Key Features<i class="fas fa-star ms-2 pulse-icon"></i>
+        </h2>
+    </div>
+
+    <div class="col-md-3">
+        <a href="{{ url_for('feature_jwt') }}" class="text-decoration-none text-dark">
+            <div class="stat-card h-100">
+                <i class="fas fa-lock stat-icon floating-icon"></i>
+                <h5>JWT Security</h5>
+                <p class="text-muted mb-0">Token-based authentication for secure access</p>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-3">
+        <a href="{{ url_for('feature_tracking') }}" class="text-decoration-none text-dark">
+            <div class="stat-card h-100">
+                <i class="fas fa-search-dollar stat-icon floating-icon"></i>
+                <h5>Fund Tracking</h5>
+                <p class="text-muted mb-0">Real-time donation and allocation monitoring</p>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-3">
+        <a href="{{ url_for('feature_verification') }}" class="text-decoration-none text-dark">
+            <div class="stat-card h-100">
+                <i class="fas fa-clipboard-check stat-icon floating-icon"></i>
+                <h5>Verification</h5>
+                <p class="text-muted mb-0">Multi-level user and transaction verification</p>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-3">
+        <a href="{{ url_for('feature_transparency') }}" class="text-decoration-none text-dark">
+            <div class="stat-card h-100">
+                <i class="fas fa-chart-pie stat-icon floating-icon"></i>
+                <h5>Transparency</h5>
+                <p class="text-muted mb-0">Complete audit trail and utilization reports</p>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card p-4">
+            <h4 class="text-center mb-4" style="color: #C71585;">
+                <i class="fas fa-route me-2"></i>How It Works
+            </h4>
+            <div class="row text-center">
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <span class="badge rounded-pill"
+                            style="background: linear-gradient(90deg, #DB7093, #C71585); font-size: 1.5rem; padding: 15px 25px;">1</span>
+                    </div>
+                    <i class="fas fa-user-plus fa-2x mb-2" style="color: #DB7093;"></i>
+                    <h6>Register & Verify</h6>
+                    <p class="text-muted small">Users sign up and get verified by administrators</p>
+                </div>
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <span class="badge rounded-pill"
+                            style="background: linear-gradient(90deg, #DB7093, #C71585); font-size: 1.5rem; padding: 15px 25px;">2</span>
+                    </div>
+                    <i class="fas fa-donate fa-2x mb-2" style="color: #DB7093;"></i>
+                    <h6>Donate Securely</h6>
+                    <p class="text-muted small">Secure contributions are tracked and audited transparently</p>
+                </div>
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <span class="badge rounded-pill"
+                            style="background: linear-gradient(90deg, #DB7093, #C71585); font-size: 1.5rem; padding: 15px 25px;">3</span>
+                    </div>
+                    <i class="fas fa-hand-holding-heart fa-2x mb-2" style="color: #DB7093;"></i>
+                    <h6>Allocate Funds</h6>
+                    <p class="text-muted small">NFSA allocates funds to verified beneficiaries</p>
+                </div>
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <span class="badge rounded-pill"
+                            style="background: linear-gradient(90deg, #DB7093, #C71585); font-size: 1.5rem; padding: 15px 25px;">4</span>
+                    </div>
+                    <i class="fas fa-file-invoice-dollar fa-2x mb-2" style="color: #DB7093;"></i>
+                    <h6>Track Utilization</h6>
+                    <p class="text-muted small">Monitor and report fund utilization transparently</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

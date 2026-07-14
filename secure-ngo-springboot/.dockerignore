@@ -1,0 +1,14 @@
+target/
+*.jar
+*.mv.db
+*.trace.db
+charity_guard.mv.db
+charity_guard.trace.db
+.idea/
+*.iml
+.settings/
+.project
+.classpath
+.vscode/
+node_modules/
+*.log

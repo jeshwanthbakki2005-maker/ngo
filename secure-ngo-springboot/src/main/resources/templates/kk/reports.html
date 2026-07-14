@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{kk/dashboard_layout :: layout(~{::title}, ~{::content}, 'reports')}">
+<head>
+    <title>Impact Reports - NGO Fund Tracker</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div class="page-header">
+        <h2>Impact Reports</h2>
+        <p>Read detailed reports on how your funds are transforming lives.</p>
+    </div>
+    <div class="empty-state">
+        <div class="empty-icon"><i class="fas fa-chart-bar"></i></div>
+        <h3>Impact reports are ready</h3>
+        <p>Monthly and quarterly impact reports are now available for download.</p>
+        <div class="report-links" style="margin-top:24px; display:flex; gap:14px; flex-wrap:wrap; justify-content:center;">
+            <a class="btn btn-primary" th:href="@{/kk/reports/download/monthly}" download style="padding:12px 20px; border-radius:10px; background:#4f46e5; color:#fff; text-decoration:none; font-weight:700;">Download Monthly Report</a>
+            <a class="btn btn-secondary" th:href="@{/kk/reports/download/quarterly}" download style="padding:12px 20px; border-radius:10px; background:#10b981; color:#fff; text-decoration:none; font-weight:700;">Download Quarterly Report</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

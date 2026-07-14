@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{kk/dashboard_layout :: layout(~{::title}, ~{::content}, 'campaigns')}">
+<head>
+    <title>Campaigns - NGO Fund Tracker</title>
+</head>
+<body>
+<div th:fragment="content">
+    <style>
+        .section-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; margin-top: 24px; }
+        .section-title { font-size: 1.05rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px; }
+        .section-title i { color: #10b981; }
+
+        /* ── Disaster Report Cards ── */
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-bottom: 28px; }
+        .disaster-card { background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,.07); border: 1px solid #e2e8f0; transition: transform .2s, box-shadow .2s; }
+        .disaster-card:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,.12); }
+        .card-image-wrap { position: relative; height: 200px; overflow: hidden; }
+        .card-image-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s; }
+        .disaster-card:hover .card-image-wrap img { transform: scale(1.05); }
+        .card-image-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.7) 0%, transparent 60%); }
+        .card-image-badge { position: absolute; top: 12px; left: 12px; padding: 4px 12px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; color: white; display: flex; align-items: center; gap: 6px; }
+        .badge-flood { background: rgba(59,130,246,.85); backdrop-filter: blur(4px); }
+        .badge-earthquake { background: rgba(239,68,68,.85); backdrop-filter: blur(4px); }
+        .badge-cyclone { background: rgba(139,92,246,.85); backdrop-filter: blur(4px); }
+        .badge-fire { background: rgba(245,158,11,.85); backdrop-filter: blur(4px); }
+        .card-image-location { position: absolute; bottom: 12px; left: 12px; color: white; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+        .card-image-severity { position: absolute; top: 12px; right: 12px; padding: 3px 10px; border-radius: 20px; font-size: 0.68rem; font-weight: 700; }
+        .severity-critical { background: #ef4444; color: white; }
+        .severity-high { background: #f59e0b; color: white; }
+        .severity-medium { background: #3b82f6; color: white; }
+        .card-body-content { padding: 18px; }
+        .card-disaster-title { font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+        .card-description { font-size: 0.8rem; color: #64748b; line-height: 1.6; margin-bottom: 14px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .card-meta { display: flex; gap: 16px; padding-top: 12px; border-top: 1px solid #e2e8f0; }
+        .meta-item { display: flex; align-items: center; gap: 5px; font-size: 0.72rem; color: #64748b; }
+        .meta-item i { color: #10b981; }
+        .card-actions { display: flex; gap: 8px; margin-top: 14px; }
+        .btn-donate { flex: 1; background: linear-gradient(135deg,#10b981,#059669); color: white; border: none; padding: 8px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: .2s; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px;}
+        .btn-donate:hover { opacity: .9; color: white; }
+        .btn-details { flex: 1; background: #f0fdf4; color: #10b981; border: 1px solid #bbf7d0; padding: 8px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: .2s; }
+        .btn-details:hover { background: #10b981; color: white; }
+        
+        /* Progress bar */
+        .progress-wrap { background: #e2e8f0; border-radius: 10px; height: 6px; overflow: hidden; margin-top: 5px; }
+        .progress-bar-fill { height: 100%; border-radius: 10px; }
+        .progress-blue { background: linear-gradient(90deg, #3b82f6, #2563eb); }
+    </style>
+
+    <div class="page-header">
+        <h2>Campaigns & Disaster Reports</h2>
+        <p>Explore active fundraising campaigns and causes.</p>
+    </div>
+
+    <!-- Active Campaign Cards -->
+    <div class="section-heading">
+        <div class="section-title"><i class="fas fa-map-marked-alt"></i> Ongoing Disaster Situations</div>
+    </div>
+
+    <div class="cards-grid">
+        <!-- Dynamic Cards from Database -->
+        <div class="disaster-card" th:each="r : ${disasterReports}">
+            <div class="card-image-wrap">
+                <img th:if="${r.photoBase64 != null}" th:src="|data:image/jpeg;base64,${r.photoBase64}|" alt="Disaster Image">
+                <img th:unless="${r.photoBase64 != null}" th:src="${r.disasterType == 'flood' ? '/images/flood_disaster.png' : (r.disasterType == 'earthquake' ? '/images/earthquake_disaster.png' : (r.disasterType == 'cyclone' ? '/images/cyclone_disaster.png' : '/images/flood_disaster.png'))}" alt="Disaster Image">
+                <div class="card-image-overlay"></div>
+                <div class="card-image-badge" th:classappend="${'badge-' + r.disasterType}">
+                    <i class="fas" th:classappend="${r.disasterType == 'flood' ? 'fa-water' : (r.disasterType == 'earthquake' ? 'fa-house-damage' : (r.disasterType == 'cyclone' ? 'fa-wind' : 'fa-exclamation-triangle'))}"></i> <span th:text="${#strings.capitalize(r.disasterType)}"></span>
+                </div>
+                <div class="card-image-severity" th:classappend="${'severity-' + r.severity}" th:text="${#strings.capitalize(r.severity)}"></div>
+                <div class="card-image-location"><i class="fas fa-map-marker-alt"></i> <span th:text="${r.location + ', ' + r.state}"></span></div>
+            </div>
+            <div class="card-body-content">
+                <div class="card-disaster-title" th:text="${#strings.capitalize(r.disasterType) + ' Emergency in ' + r.location}"></div>
+                <div class="card-description" th:text="${r.description}"></div>
+                <div style="margin-bottom:10px;">
+                    <div style="display:flex;justify-content:space-between;font-size:.75rem;color:#64748b;margin-bottom:5px;"><span>Relief Collected</span><span style="font-weight:700;color:#10b981;">&#8377; <span th:text="${#numbers.formatInteger(r.amountRaised, 0, 'COMMA')}"></span> / &#8377; <span th:text="${r.requiredAmount != null ? #numbers.formatInteger(r.requiredAmount, 0, 'COMMA') : '5,00,000'}"></span></span></div>
+                    <div class="progress-wrap"><div class="progress-bar-fill progress-blue" th:style="'width: ' + (${r.requiredAmount != null and r.requiredAmount > 0 ? (r.amountRaised / r.requiredAmount * 100) : 0}) + '%;'"></div></div>
+                </div>
+                <div class="card-meta">
+                    <div class="meta-item"><i class="fas fa-users"></i> <span th:text="${r.familiesAffected}"></span> families</div>
+                    <div class="meta-item"><i class="fas fa-calendar-alt"></i> <span th:text="${#temporals.format(r.createdAt, 'dd MMM yyyy')}"></span></div>
+                    <div class="meta-item"><i class="fas fa-clock"></i> <span th:text="${#strings.capitalize(r.status)}"></span></div>
+                </div>
+                <div class="card-actions">
+                    <a th:href="@{/kk/donate(purpose=${r.disasterType})}" class="btn-donate"><i class="fas fa-hand-holding-heart"></i> Donate Now</a>
+                    <button class="btn-details"
+                            th:data-title="${#strings.capitalize(r.disasterType) + ' Emergency in ' + r.location}"
+                            th:data-location="${r.location + ', ' + r.state}"
+                            th:data-type="${r.disasterType}"
+                            th:data-severity="${r.severity}"
+                            th:data-date="${#temporals.format(r.createdAt, 'dd MMM yyyy')}"
+                            th:data-desc="${r.description}"
+                            onclick="showReportFromCard(this)">
+                        <i class="fas fa-info-circle"></i> View Report
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty state when no reports -->
+        <div th:if="${disasterReports == null or #lists.isEmpty(disasterReports)}" style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#64748b;">
+            <i class="fas fa-satellite-dish" style="font-size:3rem;margin-bottom:16px;color:#cbd5e1;"></i>
+            <div style="font-size:1rem;font-weight:600;margin-bottom:8px;">No Active Disaster Reports</div>
+            <div style="font-size:.85rem;">Check back later for active campaigns.</div>
+        </div>
+
+    </div>
+
+    <!-- Modal -->
+    <div id="reportModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;align-items:center;justify-content:center;">
+        <div style="background:white;border-radius:20px;width:580px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,.3);animation:modalIn .25s ease;">
+            <div id="modalImageWrap" style="height:240px;position:relative;overflow:hidden;border-radius:20px 20px 0 0;">
+                <img id="modalImage" src="" alt="" style="width:100%;height:100%;object-fit:cover;">
+                <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.8),transparent 50%);"></div>
+                <button onclick="closeReportModal()" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,.2);backdrop-filter:blur(8px);border:none;border-radius:50%;width:36px;height:36px;color:white;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;"><i class="fas fa-times"></i></button>
+                <div style="position:absolute;bottom:16px;left:20px;">
+                    <div id="modalBadge" style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:700;color:white;margin-bottom:6px;"></div>
+                    <h3 id="modalTitle" style="color:white;font-size:1.2rem;font-weight:800;margin:0;"></h3>
+                </div>
+            </div>
+            <div style="padding:24px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;">
+                    <div style="background:#f8fafc;border-radius:10px;padding:12px;text-align:center;">
+                        <div style="font-size:.7rem;color:#64748b;font-weight:600;margin-bottom:4px;">LOCATION</div>
+                        <div id="modalLocation" style="font-size:.85rem;font-weight:700;color:#0f172a;display:flex;align-items:center;justify-content:center;gap:4px;"><i class="fas fa-map-marker-alt" style="color:#ef4444;"></i></div>
+                    </div>
+                    <div style="background:#f8fafc;border-radius:10px;padding:12px;text-align:center;">
+                        <div style="font-size:.7rem;color:#64748b;font-weight:600;margin-bottom:4px;">SEVERITY</div>
+                        <div id="modalSeverity" style="font-size:.85rem;font-weight:700;"></div>
+                    </div>
+                    <div style="background:#f8fafc;border-radius:10px;padding:12px;text-align:center;">
+                        <div style="font-size:.7rem;color:#64748b;font-weight:600;margin-bottom:4px;">REPORTED ON</div>
+                        <div id="modalDate" style="font-size:.85rem;font-weight:700;color:#0f172a;"></div>
+                    </div>
+                </div>
+                <h6 style="font-weight:700;color:#0f172a;margin-bottom:10px;"><i class="fas fa-file-alt" style="color:#10b981;margin-right:6px;"></i>Situation Report</h6>
+                <p id="modalDesc" style="font-size:.875rem;color:#64748b;line-height:1.8;background:#f8fafc;border-radius:10px;padding:16px;border-left:4px solid #10b981;"></p>
+                <div style="display:flex;gap:12px;margin-top:20px;">
+                    <a th:href="@{/kk/donate}" style="flex:1;padding:12px;font-size:.875rem;background: linear-gradient(135deg,#10b981,#059669); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: .2s; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px;"><i class="fas fa-hand-holding-heart"></i> Donate to This Campaign</a>
+                    <button onclick="closeReportModal()" style="background:#f1f5f9;color:#0f172a;border:none;padding:12px 20px;border-radius:10px;font-weight:600;cursor:pointer;font-size:.875rem;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <style>
+    @keyframes modalIn { from { opacity:0;transform:scale(.95) translateY(-20px); } to { opacity:1;transform:scale(1) translateY(0); } }
+    </style>
+    <script>
+    const imageMap = { flood: '/images/flood_disaster.png', earthquake: '/images/earthquake_disaster.png', cyclone: '/images/cyclone_disaster.png' };
+    const badgeMap = {
+        flood: { bg: 'rgba(59,130,246,.85)', icon: 'fa-water', label: 'Flood' },
+        earthquake: { bg: 'rgba(239,68,68,.85)', icon: 'fa-house-damage', label: 'Earthquake' },
+        cyclone: { bg: 'rgba(139,92,246,.85)', icon: 'fa-wind', label: 'Cyclone' },
+    };
+    const sevColorMap = { Critical: '#ef4444', High: '#f59e0b', Medium: '#3b82f6', Low: '#10b981' };
+
+    function showReportFromCard(btn) {
+        const title    = btn.getAttribute('data-title');
+        const location = btn.getAttribute('data-location');
+        const type     = btn.getAttribute('data-type');
+        const severity = btn.getAttribute('data-severity');
+        const date     = btn.getAttribute('data-date');
+        const desc     = btn.getAttribute('data-desc');
+        
+        document.getElementById('modalTitle').textContent = title;
+        document.getElementById('modalLocation').innerHTML = '<i class="fas fa-map-marker-alt" style="color:#ef4444;"></i> ' + location;
+        document.getElementById('modalSeverity').textContent = severity;
+        document.getElementById('modalSeverity').style.color = sevColorMap[severity] || '#64748b';
+        document.getElementById('modalDate').textContent = date;
+        document.getElementById('modalDesc').textContent = desc;
+        document.getElementById('modalImage').src = imageMap[type] || imageMap.flood;
+        
+        const badge = badgeMap[type] || badgeMap.flood;
+        document.getElementById('modalBadge').style.background = badge.bg;
+        document.getElementById('modalBadge').innerHTML = '<i class="fas ' + badge.icon + '"></i> ' + badge.label;
+        
+        document.getElementById('reportModal').style.display = 'flex';
+    }
+
+    function closeReportModal() {
+        document.getElementById('reportModal').style.display = 'none';
+    }
+
+    document.getElementById('reportModal').addEventListener('click', function(e) {
+        if (e.target === this) closeReportModal();
+    });
+    </script>
+</div>
+</body>
+</html>

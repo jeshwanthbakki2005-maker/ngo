@@ -1,0 +1,76 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: layout(~{::title}, ~{::content})}">
+
+<head><title th:fragment="title">Beneficiary Registration - NGO Fund Tracker</title></head>
+
+<body><div th:fragment="content">
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+        <div class="card">
+            <div class="card-header text-center py-4" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border-radius: 12px 12px 0 0;">
+                <i class="fas fa-user-plus fa-3x mb-2 floating-icon text-white"></i>
+                <h3 class="mb-0 text-white">Beneficiary Registration</h3>
+                <p class="mb-0 text-white opacity-75">Join our platform to request support</p>
+            </div>
+            <div class="card-body p-4">
+                <div th:if="${error != false && error != null}" class="alert alert-danger">[[${error}]]</div>
+                <form method="POST" th:action="@{/auth/beneficiary/signup}">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label"><i class="fas fa-user me-2" style="color: #10b981;"></i>Full Name</label>
+                            <input type="text" class="form-control" name="full_name" required placeholder="John Doe">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label"><i class="fas fa-envelope me-2" style="color: #10b981;"></i>Email Address</label>
+                            <input type="email" class="form-control" name="email" required placeholder="john@example.com">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label"><i class="fas fa-lock me-2" style="color: #10b981;"></i>Password</label>
+                            <input type="password" class="form-control" name="password" required minlength="12" maxlength="72" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])[^\s]{12,72}" title="12+ characters with uppercase, lowercase, number and special character; no spaces" placeholder="Strong password (12+ characters)">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label"><i class="fas fa-phone me-2" style="color: #10b981;"></i>Phone Number</label>
+                            <input type="tel" class="form-control" name="phone" required placeholder="+91 XXXXX XXXXX">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label"><i class="fas fa-hands-helping me-2" style="color: #10b981;"></i>Primary Need</label>
+                            <select class="form-select" name="need_category" required>
+                                <option value="" disabled selected>Select category</option>
+                                <option value="Education">Education & Schooling</option>
+                                <option value="Healthcare">Medical & Healthcare</option>
+                                <option value="Disaster Relief">Disaster Relief</option>
+                                <option value="Food & Shelter">Food & Shelter</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label"><i class="fas fa-users me-2" style="color: #10b981;"></i>Family Size</label>
+                            <input type="number" class="form-control" name="family_members" value="1" min="1" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label"><i class="fas fa-rupee-sign me-2" style="color: #10b981;"></i>Monthly Income</label>
+                            <input type="number" class="form-control" name="monthly_income" value="0" min="0" step="100">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label"><i class="fas fa-map-marker-alt me-2" style="color: #10b981;"></i>Full Address</label>
+                            <textarea class="form-control" name="address" rows="2" required placeholder="Enter complete address"></textarea>
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-success btn-lg" style="background-color: #10b981; border: none;">
+                            <i class="fas fa-paper-plane me-2"></i>Create Beneficiary Account
+                        </button>
+                    </div>
+                </form>
+                <div class="text-center mt-4">
+                    <p class="mb-0">Already have an account?
+                        <a th:href="@{/auth/beneficiary/login}" style="color: #059669; font-weight: 600;">
+                            <i class="fas fa-sign-in-alt me-1"></i>Login here
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div></body>
+</html>

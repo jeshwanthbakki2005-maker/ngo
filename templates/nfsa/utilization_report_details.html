@@ -1,0 +1,337 @@
+{% extends 'base.html' %}
+
+{% block title %}Utilization Report Details - NGO Fund Tracker{% endblock %}
+
+{% block navbar %}
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="{{ url_for('nfsa_dashboard') }}">
+            <i class="fas fa-hand-holding-heart me-2 floating-icon"></i>NGO Fund Tracker
+        </a>
+        <div class="d-flex align-items-center">
+            <span class="text-white me-3"><i class="fas fa-user-tie me-2"></i>{{ name }}</span>
+            <a href="{{ url_for('logout') }}" class="btn btn-light" style="border-radius: 25px;">
+                <i class="fas fa-sign-out-alt me-2"></i>Logout
+            </a>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <div class="sidebar">
+            <h5 class="mb-4" style="color: #C71585;"><i class="fas fa-bars me-2"></i>NFSA Menu</h5>
+            <a href="{{ url_for('nfsa_dashboard') }}" class="sidebar-link">
+                <i class="fas fa-tachometer-alt"></i>Dashboard Overview
+            </a>
+            <a href="{{ url_for('nfsa_fund_allocation') }}" class="sidebar-link">
+                <i class="fas fa-hand-holding-usd"></i>Fund Allocation
+            </a>
+            <a href="{{ url_for('nfsa_dashboard') }}" class="sidebar-link">
+                <i class="fas fa-user-check"></i>Beneficiary Verification
+            </a>
+            <a href="{{ url_for('nfsa_dashboard') }}" class="sidebar-link active">
+                <i class="fas fa-file-invoice-dollar"></i>Utilization Reports
+            </a>
+            <a href="{{ url_for('nfsa_financial_reports') }}" class="sidebar-link">
+                <i class="fas fa-chart-bar"></i>Financial Reports
+            </a>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <!-- Back Button -->
+        <div class="mb-3">
+            <a href="{{ url_for('nfsa_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+        </div>
+
+        <!-- Report Header -->
+        <div class="card mb-4">
+            <div class="card-header" style="background: linear-gradient(90deg, #DB7093, #C71585); color: white;">
+                <h4 class="mb-0"><i class="fas fa-file-invoice-dollar me-2"></i>Fund Utilization Report Details</h4>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <p><strong>Report ID:</strong> #{{ report.id }}</p>
+                        <p><strong>Status:</strong> 
+                            {% if report.status == 'submitted' %}
+                            <span class="badge badge-pending"><i class="fas fa-hourglass me-1"></i>Pending Approval</span>
+                            {% elif report.status == 'verified' %}
+                            <span class="badge badge-verified"><i class="fas fa-check-circle me-1"></i>Approved</span>
+                            {% elif report.status == 'rejected' %}
+                            <span class="badge badge-danger"><i class="fas fa-times-circle me-1"></i>Rejected</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-6 text-md-right">
+                        <p><strong>Submitted Date:</strong> {{ report.created_at.strftime('%d %b %Y %H:%M') }}</p>
+                        {% if report.verified_at %}
+                        <p><strong>Verified Date:</strong> {{ report.verified_at.strftime('%d %b %Y %H:%M') }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Approval Action Buttons -->
+                {% if report.status == 'submitted' %}
+                <hr>
+                <div class="d-flex gap-2 justify-content-end">
+                    <div class="d-inline">
+                        <button class="btn btn-success btn-lg" disabled title="Action removed"><i class="fas fa-check me-2"></i>Approve Report</button>
+                        <button class="btn btn-danger btn-lg" disabled title="Action removed"><i class="fas fa-times me-2"></i>Reject Report</button>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Beneficiary Information -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header" style="background: linear-gradient(90deg, #FFE4E1, #FFB6C1);">
+                        <h5 class="mb-0" style="color: #C71585;"><i class="fas fa-user me-2"></i>Beneficiary Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; background: linear-gradient(135deg, #FFE4E1, #FFB6C1);">
+                                <i class="fas fa-user fa-xl" style="color: #C71585;"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">{{ beneficiary.full_name }}</h5>
+                                <small class="text-muted">Beneficiary</small>
+                            </div>
+                        </div>
+                        <hr>
+                        <p><strong><i class="fas fa-envelope me-2"></i>Email:</strong> {{ beneficiary.email }}</p>
+                        <p><strong><i class="fas fa-phone me-2"></i>Phone:</strong> {{ beneficiary.phone }}</p>
+                        <p><strong><i class="fas fa-map-marker-alt me-2"></i>Address:</strong> {{ beneficiary.address }}</p>
+                        <p><strong><i class="fas fa-tag me-2"></i>Need Category:</strong> <span class="badge" style="background: linear-gradient(90deg, #DB7093, #C71585);">{{ beneficiary.need_category }}</span></p>
+                        <p><strong><i class="fas fa-users me-2"></i>Family Members:</strong> {{ beneficiary.family_members }}</p>
+                        <p><strong><i class="fas fa-dollar-sign me-2"></i>Monthly Income:</strong> ₹{{ "{:,.2f}".format(beneficiary.monthly_income) }}</p>
+                        <p><strong><i class="fas fa-check-circle me-2"></i>Verification Status:</strong> 
+                            {% if beneficiary.is_verified %}
+                            <span class="badge badge-verified">Verified</span>
+                            {% else %}
+                            <span class="badge badge-pending">Pending</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Utilization Report Details -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header" style="background: linear-gradient(90deg, #FFE4E1, #FFB6C1);">
+                        <h5 class="mb-0" style="color: #C71585;"><i class="fas fa-file-invoice-dollar me-2"></i>Report Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong><i class="fas fa-rupee-sign me-2"></i>Amount Used:</strong> <span style="font-size: 1.3em; color: #C71585;">₹{{ "{:,.2f}".format(report.amount_used) }}</span></p>
+                        <hr>
+                        <p><strong><i class="fas fa-pen me-2"></i>Description:</strong></p>
+                        <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; border-left: 4px solid #C71585;">
+                            {{ report.description }}
+                        </div>
+                        <hr>
+                        <p><strong><i class="fas fa-receipt me-2"></i>Receipt Reference:</strong> {{ report.receipt_reference or 'Not Provided' }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fund Allocation Information -->
+        <div class="card mb-4">
+            <div class="card-header" style="background: linear-gradient(90deg, #FFE4E1, #FFB6C1);">
+                <h5 class="mb-0" style="color: #C71585;"><i class="fas fa-hand-holding-usd me-2"></i>Fund Allocation Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Allocation ID:</strong> #{{ allocation.id }}</p>
+                        <p><strong>Purpose:</strong> {{ allocation.purpose }}</p>
+                        <p><strong>Total Allocated:</strong> <span style="font-size: 1.1em; color: #C71585;">₹{{ "{:,.2f}".format(allocation.amount) }}</span></p>
+                        <p><strong>Status:</strong> <span class="badge badge-verified">{{ allocation.status }}</span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Allocated Date:</strong> {{ allocation.created_at.strftime('%d %b %Y') }}</p>
+                        <p><strong>Disbursed Date:</strong> {{ allocation.disbursed_at.strftime('%d %b %Y') if allocation.disbursed_at else 'N/A' }}</p>
+                        <p><strong>Total Utilized (including this report):</strong> <span style="font-size: 1.1em; color: #28a745;">₹{{ "{:,.2f}".format(total_utilized) }}</span></p>
+                        <p><strong>Remaining Balance:</strong> <span style="font-size: 1.1em; color: #ffc107;">₹{{ "{:,.2f}".format(remaining) }}</span></p>
+                    </div>
+                </div>
+
+                <!-- Utilization Progress -->
+                <hr>
+                <h6>Fund Utilization Progress</h6>
+                <div class="progress mb-2" style="height: 25px;">
+                    {% set percent = (total_utilized / allocation.amount * 100) if allocation.amount > 0 else 0 %}
+                    <div class="progress-bar" role="progressbar" style="width: {{ percent }}%; background: linear-gradient(90deg, #DB7093, #C71585);">
+                        {{ "{:.1f}".format(percent) }}%
+                    </div>
+                </div>
+                <small class="text-muted">Utilized: ₹{{ "{:,.2f}".format(total_utilized) }} of ₹{{ "{:,.2f}".format(allocation.amount) }}</small>
+            </div>
+        </div>
+
+        <!-- Donor Information -->
+        <div class="card mb-4">
+            <div class="card-header" style="background: linear-gradient(90deg, #FFE4E1, #FFB6C1);">
+                <h5 class="mb-0" style="color: #C71585;"><i class="fas fa-donate me-2"></i>Related Donation Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Donation ID:</strong> {{ donation.transaction_id }}</p>
+                        <p><strong>Donation Amount:</strong> <span style="font-size: 1.1em; color: #C71585;">₹{{ "{:,.2f}".format(donation.amount) }}</span></p>
+                        <p><strong>Purpose:</strong> {{ donation.purpose }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Payment Method:</strong> {{ donation.payment_method }}</p>
+                        <p><strong>Donation Date:</strong> {{ donation.created_at.strftime('%d %b %Y') }}</p>
+                        <p><strong>Status:</strong> <span class="badge badge-verified">{{ donation.status }}</span></p>
+                    </div>
+                </div>
+                <hr>
+                <h6><i class="fas fa-user-circle me-2"></i>Donor Information</h6>
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; background: linear-gradient(135deg, #E6F3FF, #CCE5FF);">
+                        <i class="fas fa-user-tie fa-xl" style="color: #0066cc;"></i>
+                    </div>
+                    <div>
+                        <p class="mb-0"><strong>{{ donor.full_name }}</strong></p>
+                        <p class="mb-0"><small class="text-muted">{{ donor.email }}</small></p>
+                        <p class="mb-0"><small class="text-muted">Phone: {{ donor.phone }}</small></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- All Reports for this Allocation -->
+        <div class="card">
+            <div class="card-header" style="background: linear-gradient(90deg, #FFE4E1, #FFB6C1);">
+                <h5 class="mb-0" style="color: #C71585;"><i class="fas fa-history me-2"></i>All Utilization Reports for this Allocation</h5>
+            </div>
+            <div class="card-body">
+                {% if allocation_reports %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-hashtag me-1"></i>Report ID</th>
+                                <th><i class="fas fa-rupee-sign me-1"></i>Amount</th>
+                                <th><i class="fas fa-calendar me-1"></i>Submitted Date</th>
+                                <th><i class="fas fa-info-circle me-1"></i>Status</th>
+                                <th><i class="fas fa-receipt me-1"></i>Receipt Reference</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in allocation_reports %}
+                            <tr {% if r.id == report.id %}style="background-color: #fff3f6;"{% endif %}>
+                                <td><strong>#{{ r.id }}</strong></td>
+                                <td>₹{{ "{:,.2f}".format(r.amount_used) }}</td>
+                                <td>{{ r.created_at.strftime('%d %b %Y') }}</td>
+                                <td>
+                                    {% if r.status == 'submitted' %}
+                                    <span class="badge badge-pending"><i class="fas fa-hourglass me-1"></i>Pending</span>
+                                    {% elif r.status == 'verified' %}
+                                    <span class="badge badge-verified"><i class="fas fa-check-circle me-1"></i>Approved</span>
+                                    {% elif r.status == 'rejected' %}
+                                    <span class="badge badge-danger"><i class="fas fa-times-circle me-1"></i>Rejected</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ r.receipt_reference or '-' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">No utilization reports for this allocation yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-group {
+        display: flex;
+        gap: 0;
+    }
+
+    .btn-group form {
+        margin: 0;
+    }
+
+    .btn-group .btn {
+        border-radius: 0;
+        margin: 0 2px;
+    }
+
+    .badge-pending {
+        background: linear-gradient(90deg, #ffc107, #ff9800);
+        color: white;
+    }
+
+    .badge-verified {
+        background: linear-gradient(90deg, #28a745, #20c997);
+        color: white;
+    }
+
+    .floating-icon {
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .card {
+        border-radius: 10px;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+    }
+
+    .sidebar {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 20px;
+    }
+
+    .sidebar-link {
+        display: block;
+        padding: 12px 15px;
+        color: #333;
+        text-decoration: none;
+        border-left: 4px solid transparent;
+        transition: all 0.3s ease;
+        border-radius: 5px;
+        margin-bottom: 8px;
+    }
+
+    .sidebar-link:hover,
+    .sidebar-link.active {
+        background: linear-gradient(90deg, #FFE4E1, #FFB6C1);
+        border-left-color: #C71585;
+        color: #C71585;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}NFSA Signup - NGO Fund Tracker{% endblock %}
+
+{% block navbar %}
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="{{ url_for('home') }}">
+            <i class="fas fa-hand-holding-heart me-2 floating-icon"></i>NGO Fund Tracker
+        </a>
+        <a href="{{ url_for('home') }}" class="btn btn-light" style="border-radius: 25px;">
+            <i class="fas fa-home me-2"></i>Home
+        </a>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-header text-center py-4">
+                <i class="fas fa-user-tie fa-3x mb-3 floating-icon"></i>
+                <h3 class="mb-0">NFSA Registration</h3>
+                <p class="mb-0 opacity-75">Nonprofit Financial System Administrator</p>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('nfsa_signup') }}">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-user me-2" style="color: #DB7093;"></i>Full Name</label>
+                            <input type="text" class="form-control" name="full_name" required placeholder="Enter your full name">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-envelope me-2" style="color: #DB7093;"></i>Email Address</label>
+                            <input type="email" class="form-control" name="email" required placeholder="admin@ngo.org">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-building me-2" style="color: #DB7093;"></i>Organization Name</label>
+                            <input type="text" class="form-control" name="organization_name" required placeholder="NGO Organization Name">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-id-badge me-2" style="color: #DB7093;"></i>Designation</label>
+                            <input type="text" class="form-control" name="designation" required placeholder="e.g., Finance Manager">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-phone me-2" style="color: #DB7093;"></i>Phone Number</label>
+                            <input type="tel" class="form-control" name="phone" required placeholder="+91 9876543210">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><i class="fas fa-id-card me-2" style="color: #DB7093;"></i>Employee ID</label>
+                            <input type="text" class="form-control" name="employee_id" required placeholder="EMP001">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-lock me-2" style="color: #DB7093;"></i>Password</label>
+                        <div class="input-group position-relative">
+                            <input type="password" class="form-control" id="passwordField" name="password" required minlength="6" placeholder="Minimum 6 characters">
+                            <button type="button" class="btn btn-outline-secondary position-absolute end-0 top-50 translate-middle-y border-0 togglePasswordBtn" style="z-index: 10; background: transparent; cursor: pointer;">
+                                <i class="fas fa-eye eyeIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Register as NFSA
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="text-center mt-4">
+                    <p class="mb-0">Already have an account? 
+                        <a href="{{ url_for('nfsa_login') }}" style="color: #C71585; font-weight: 600;">
+                            <i class="fas fa-sign-in-alt me-1"></i>Login here
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.togglePasswordBtn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const passwordField = this.closest('.input-group').querySelector('input[type="password"], input[type="text"]');
+            const eyeIcon = this.querySelector('.eyeIcon');
+            
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordField.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        });
+    });
+</script>
+{% endblock %}

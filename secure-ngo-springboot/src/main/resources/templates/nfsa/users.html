@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{nfsa/nfsa_layout :: layout(~{::title}, ~{::content}, 'users')}">
+<head>
+    <title>Users Management - Admin Panel</title>
+</head>
+<body>
+<div th:fragment="content">
+<style>
+    /* ── Page Styles ── */
+    .page-header { margin-bottom: 24px; }
+    .page-header h2 { font-size: 1.3rem; font-weight: 700; color: var(--text-main); margin: 0 0 4px; }
+    .page-header p  { font-size: 0.85rem; color: var(--text-muted); margin: 0; }
+
+    /* ── Stats Row ── */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-mini { background: #fff; border-radius: 12px; border: 1px solid var(--border-color); padding: 18px 20px; display: flex; align-items: center; gap: 14px; box-shadow: 0 1px 3px rgba(0,0,0,.03); }
+    .stat-mini-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem; flex-shrink: 0; }
+    .stat-mini-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+    .stat-mini-value { font-size: 1.6rem; font-weight: 700; color: var(--text-main); line-height: 1.2; }
+
+    /* ── Tab Navigation ── */
+    .tab-nav { display: flex; gap: 4px; background: #f1f5f9; border-radius: 10px; padding: 4px; margin-bottom: 20px; width: fit-content; }
+    .tab-btn { padding: 8px 20px; border-radius: 8px; border: none; background: transparent; font-size: 0.85rem; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: .15s; display: flex; align-items: center; gap: 7px; }
+    .tab-btn.active { background: white; color: var(--primary); font-weight: 600; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+    .tab-count { background: var(--primary); color: white; font-size: 0.65rem; font-weight: 700; padding: 2px 7px; border-radius: 10px; }
+    .tab-btn:not(.active) .tab-count { background: #e2e8f0; color: var(--text-muted); }
+
+    /* ── Search & Filter Bar ── */
+    .toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    .search-wrap { position: relative; flex: 1; min-width: 220px; }
+    .search-wrap i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.85rem; }
+    .search-inp { width: 100%; padding: 9px 16px 9px 36px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.85rem; outline: none; transition: 0.2s; background: #fff; }
+    .search-inp:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    .filter-select { padding: 9px 14px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.85rem; outline: none; color: var(--text-main); background: #fff; cursor: pointer; }
+
+    /* ── Table Card ── */
+    .table-card { background: #fff; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,.03); overflow: hidden; }
+    .table-card-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--border-color); background: #f8fafc; }
+    .table-card-title { font-size: 0.9rem; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+    .row-count { font-size: 0.78rem; color: var(--text-muted); }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 11px 16px; font-size: 0.73rem; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border-color); white-space: nowrap; text-transform: uppercase; letter-spacing: .03em; }
+    td { padding: 12px 16px; font-size: 0.82rem; color: var(--text-main); border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr.user-row:hover td { background: #f8fafc; }
+
+    /* ── User Cell ── */
+    .user-cell { display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 34px; height: 34px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
+    .avatar.kk { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+    .avatar.ben { background: linear-gradient(135deg, #10b981, #059669); }
+    .avatar.admin { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .user-name { font-size: 0.85rem; font-weight: 600; color: var(--text-main); }
+    .user-email { font-size: 0.73rem; color: var(--text-muted); }
+
+    /* ── Role Badges ── */
+    .role-badge { padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; }
+    .role-kk    { background: #ede9fe; color: #5b21b6; }
+    .role-ben   { background: #d1fae5; color: #065f46; }
+    .role-admin { background: #fef3c7; color: #92400e; }
+
+    /* ── Status Badges ── */
+    .status-badge { padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+    .status-verified { background: #d1fae5; color: #065f46; }
+    .status-pending  { background: #fef3c7; color: #92400e; }
+
+    /* ── Tab Panels ── */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Empty State ── */
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+    .empty-state i { font-size: 3rem; margin-bottom: 16px; opacity: .3; display: block; }
+    .edit-btn{border:0;background:#eef2ff;color:#4338ca;border-radius:8px;padding:7px 11px;font-size:.72rem;font-weight:700;cursor:pointer}.row-actions{display:flex;gap:6px;align-items:center}.row-actions form{margin:0}.delete-btn{width:31px;height:31px;border:1px solid #fecaca;background:#fef2f2;color:#dc2626;border-radius:8px;cursor:pointer}.delete-btn:hover{background:#dc2626;color:#fff}.user-modal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.62);z-index:4000;align-items:center;justify-content:center;padding:20px}.user-modal.open{display:flex}.user-dialog{background:#fff;border-radius:16px;width:680px;max-width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 28px 70px rgba(15,23,42,.3)}.user-dialog-head{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,#1e3a8a,#4f46e5);color:#fff;padding:18px 22px}.user-dialog-head h3{font-size:1rem;margin:0}.modal-close{border:0;background:rgba(255,255,255,.15);color:#fff;border-radius:50%;width:32px;height:32px}.user-form{padding:22px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.form-field label{display:block;font-size:.69rem;font-weight:700;color:#64748b;margin-bottom:5px}.form-field input,.form-field select{width:100%;border:1px solid #dbe2ea;border-radius:8px;padding:9px 10px;font-size:.8rem}.span-2{grid-column:1/-1}.role-fields{display:contents}.save-user{margin-top:18px;width:100%;border:0;border-radius:9px;background:#2563eb;color:#fff;padding:11px;font-weight:800}.flash{padding:11px 14px;border-radius:9px;margin-bottom:15px;font-size:.8rem}.flash.ok{background:#dcfce7;color:#166534}.flash.err{background:#fee2e2;color:#991b1b}@media(max-width:650px){.form-grid{grid-template-columns:1fr}.span-2{grid-column:auto}}
+    .clear-previous-form{margin-top:12px}.clear-previous-btn{border:1px solid #fca5a5;background:#fff1f2;color:#be123c;border-radius:9px;padding:9px 13px;font-size:.75rem;font-weight:800;cursor:pointer}.clear-previous-btn:hover{background:#be123c;color:#fff}
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+    <h2><i class="fas fa-users" style="color:var(--primary);margin-right:8px;"></i>Users Management</h2>
+    <form class="clear-previous-form" action="/nfsa/users/clear-previous-data" method="post" onsubmit="return confirm('Permanently clear all previous users, donations, allocations, campaigns, reports, requests, logs, and totals? Your current administrator account will be kept.')">
+        <button class="clear-previous-btn" type="submit"><i class="fas fa-eraser"></i> Clear Previous Data</button>
+    </form>
+    <p>Manage all platform users — KK Financial Administrators, Beneficiaries, and NFSA Admins</p>
+</div>
+<div class="flash ok" th:if="${successMessage}" th:text="${successMessage}"></div><div class="flash err" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+<!-- Stats Row -->
+<div class="stats-row">
+    <div class="stat-mini">
+        <div class="stat-mini-icon" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);">
+            <i class="fas fa-users"></i>
+        </div>
+        <div>
+            <div class="stat-mini-label">Total Users</div>
+            <div class="stat-mini-value" th:text="${totalUsers ?: 0}">0</div>
+        </div>
+    </div>
+    <div class="stat-mini">
+        <div class="stat-mini-icon" style="background:linear-gradient(135deg,#6366f1,#4f46e5);">
+            <i class="fas fa-hand-holding-usd"></i>
+        </div>
+        <div>
+            <div class="stat-mini-label">KK Financial Admins</div>
+            <div class="stat-mini-value" th:text="${totalDonors ?: 0}">0</div>
+        </div>
+    </div>
+    <div class="stat-mini">
+        <div class="stat-mini-icon" style="background:linear-gradient(135deg,#10b981,#059669);">
+            <i class="fas fa-shield-heart"></i>
+        </div>
+        <div>
+            <div class="stat-mini-label">Beneficiaries</div>
+            <div class="stat-mini-value" th:text="${totalBeneficiaries ?: 0}">0</div>
+        </div>
+    </div>
+    <div class="stat-mini">
+        <div class="stat-mini-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);">
+            <i class="fas fa-user-shield"></i>
+        </div>
+        <div>
+            <div class="stat-mini-label">NFSA Admins</div>
+            <div class="stat-mini-value" th:text="${totalAdmins ?: 0}">0</div>
+        </div>
+    </div>
+</div>
+
+<!-- Tab Navigation -->
+<div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('all', this)" id="tab-all">
+        <i class="fas fa-th-list"></i> All Users
+        <span class="tab-count" id="count-all" th:text="${totalUsers ?: 0}">0</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('kk', this)" id="tab-kk">
+        <i class="fas fa-hand-holding-usd"></i> KK Accounts
+        <span class="tab-count" id="count-kk" th:text="${totalDonors ?: 0}">0</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('ben', this)" id="tab-ben">
+        <i class="fas fa-users"></i> Beneficiaries
+        <span class="tab-count" id="count-ben" th:text="${totalBeneficiaries ?: 0}">0</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('admin', this)" id="tab-admin">
+        <i class="fas fa-user-shield"></i> NFSA Admins
+        <span class="tab-count" id="count-admin" th:text="${totalAdmins ?: 0}">0</span>
+    </button>
+</div>
+
+<!-- Search & Filter -->
+<div class="toolbar">
+    <div class="search-wrap">
+        <i class="fas fa-search"></i>
+        <input type="text" class="search-inp" id="searchInput" placeholder="Search by name, email or phone...">
+    </div>
+    <select class="filter-select" id="statusFilter">
+        <option value="">All Status</option>
+        <option value="verified">Verified</option>
+        <option value="pending">Pending</option>
+    </select>
+</div>
+
+<!-- ══ ALL USERS TABLE ══ -->
+<div class="tab-panel active" id="panel-all">
+    <div class="table-card">
+        <div class="table-card-header">
+            <div class="table-card-title"><i class="fas fa-list" style="color:var(--primary)"></i> All Platform Users</div>
+            <span class="row-count">Showing <span id="all-visible">0</span> users</span>
+        </div>
+        <div style="overflow-x:auto;">
+            <table id="allTable">
+                <thead><tr>
+                    <th>User</th><th>Role</th><th>Phone</th><th>Address / Details</th><th>Status</th><th>Joined</th><th>Actions</th>
+                </tr></thead>
+                <tbody>
+                    <!-- KK (Donor) Accounts -->
+                    <tr class="user-row" th:each="d : ${donors}"
+                        th:attr="data-name=${d.fullName}, data-email=${d.email}, data-status=${d.isVerified ? 'verified' : 'pending'}, data-role='kk'">
+                        <td>
+                            <div class="user-cell">
+                                <div class="avatar kk" th:text="${#strings.substring(d.fullName,0,1)}">K</div>
+                                <div>
+                                    <div class="user-name" th:text="${d.fullName}">Name</div>
+                                    <div class="user-email" th:text="${d.email}">email</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="role-badge role-kk"><i class="fas fa-hand-holding-usd"></i> KK Account</span></td>
+                        <td th:text="${d.phone}">-</td>
+                        <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" th:text="${d.address}">-</td>
+                        <td>
+                            <span class="status-badge status-verified" th:if="${d.isVerified}"><i class="fas fa-circle" style="font-size:.45rem"></i> Verified</span>
+                            <span class="status-badge status-pending" th:unless="${d.isVerified}"><i class="fas fa-circle" style="font-size:.45rem"></i> Pending</span>
+                        </td>
+                        <td th:text="${#temporals.format(d.createdAt, 'dd MMM yyyy')}">-</td>
+                        <td><div class="row-actions"><button class="edit-btn" type="button" onclick="openUserEditor(this)" th:attr="data-role='kk',data-id=${d.id},data-name=${d.fullName},data-email=${d.email},data-phone=${d.phone},data-address=${d.address},data-verified=${d.isVerified}"><i class="fas fa-pen"></i> Edit</button><form action="/nfsa/users/delete" method="post" onsubmit="return confirm('Permanently delete this KK / donor registration and ALL its donations, allocations, utilization, relief-material, reset, and audit data?')"><input type="hidden" name="role" value="kk"><input type="hidden" name="userId" th:value="${d.id}"><button class="delete-btn" type="submit" title="Delete complete donor registration"><i class="fas fa-trash"></i></button></form></div></td>
+                    </tr>
+                    <!-- Beneficiary Accounts -->
+                    <tr class="user-row" th:each="b : ${beneficiaries}"
+                        th:attr="data-name=${b.fullName}, data-email=${b.email}, data-status=${b.isVerified ? 'verified' : 'pending'}, data-role='ben'">
+                        <td>
+                            <div class="user-cell">
+                                <div class="avatar ben" th:text="${#strings.substring(b.fullName,0,1)}">B</div>
+                                <div>
+                                    <div class="user-name" th:text="${b.fullName}">Name</div>
+                                    <div class="user-email" th:text="${b.email}">email</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="role-badge role-ben"><i class="fas fa-shield-heart"></i> Beneficiary</span></td>
+                        <td th:text="${b.phone}">-</td>
+                        <td th:text="${b.needCategory + ' · ' + b.familyMembers + ' members'}">-</td>
+                        <td>
+                            <span class="status-badge status-verified" th:if="${b.isVerified}"><i class="fas fa-circle" style="font-size:.45rem"></i> Verified</span>
+                            <span class="status-badge status-pending" th:unless="${b.isVerified}"><i class="fas fa-circle" style="font-size:.45rem"></i> Pending</span>
+                        </td>
+                        <td th:text="${#temporals.format(b.createdAt, 'dd MMM yyyy')}">-</td>
+                        <td><div class="row-actions"><button class="edit-btn" type="button" onclick="openUserEditor(this)" th:attr="data-role='beneficiary',data-id=${b.id},data-name=${b.fullName},data-email=${b.email},data-phone=${b.phone},data-address=${b.address},data-need=${b.needCategory},data-family=${b.familyMembers},data-income=${b.monthlyIncome},data-verified=${b.isVerified}"><i class="fas fa-pen"></i> Edit</button><form action="/nfsa/users/delete" method="post" onsubmit="return confirm('Permanently delete this beneficiary registration and ALL its allocations, utilization, disaster reports, relief requests, reset, and audit data?')"><input type="hidden" name="role" value="beneficiary"><input type="hidden" name="userId" th:value="${b.id}"><button class="delete-btn" type="submit" title="Delete complete beneficiary registration"><i class="fas fa-trash"></i></button></form></div></td>
+                    </tr>
+                    <!-- NFSA Admin Accounts -->
+                    <tr class="user-row" th:each="a : ${nfsaAdmins}"
+                        th:attr="data-name=${a.fullName}, data-email=${a.email}, data-status='verified', data-role='admin'">
+                        <td>
+                            <div class="user-cell">
+                                <div class="avatar admin" th:text="${#strings.substring(a.fullName,0,1)}">A</div>
+                                <div>
+                                    <div class="user-name" th:text="${a.fullName}">Name</div>
+                                    <div class="user-email" th:text="${a.email}">email</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="role-badge role-admin"><i class="fas fa-user-shield"></i> NFSA Admin</span></td>
+                        <td th:text="${a.phone}">-</td>
+                        <td th:text="${a.organizationName + ' · ' + a.designation}">-</td>
+                        <td><span class="status-badge status-verified"><i class="fas fa-circle" style="font-size:.45rem"></i> Verified</span></td>
+                        <td th:text="${#temporals.format(a.createdAt, 'dd MMM yyyy')}">-</td>
+                        <td><div class="row-actions"><button class="edit-btn" type="button" onclick="openUserEditor(this)" th:attr="data-role='admin',data-id=${a.id},data-name=${a.fullName},data-email=${a.email},data-phone=${a.phone},data-organization=${a.organizationName},data-designation=${a.designation},data-employee=${a.employeeId},data-verified=${a.isVerified}"><i class="fas fa-pen"></i> Edit</button><form action="/nfsa/users/delete" method="post" onsubmit="return confirm('WARNING: Deleting your own administrator account will permanently erase ALL platform users, donations, allocations, campaigns, reports, requests, logs, and totals. Continue with the complete reset?')"><input type="hidden" name="role" value="admin"><input type="hidden" name="userId" th:value="${a.id}"><button class="delete-btn" type="submit" title="Delete account and reset all platform data"><i class="fas fa-trash"></i></button></form></div></td>
+                    </tr>
+                    <tr th:if="${(donors == null or #lists.isEmpty(donors)) and (beneficiaries == null or #lists.isEmpty(beneficiaries)) and (nfsaAdmins == null or #lists.isEmpty(nfsaAdmins))}">
+                        <td colspan="7">
+                            <div class="empty-state"><i class="fas fa-users"></i>No users found in the system.</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ══ KK ACCOUNTS TAB ══ -->
+<div class="tab-panel" id="panel-kk">
+    <div class="table-card">
+        <div class="table-card-header">
+            <div class="table-card-title"><i class="fas fa-hand-holding-usd" style="color:#6366f1"></i> KK Financial Administrator Accounts</div>
+            <span class="row-count" th:text="${totalDonors + ' accounts'}">0 accounts</span>
+        </div>
+        <div style="overflow-x:auto;">
+            <table>
+                <thead><tr><th>User</th><th>Phone</th><th>Address</th><th>Doc</th><th>Status</th><th>Joined</th></tr></thead>
+                <tbody>
+                    <tr th:each="d : ${donors}">
+                        <td>
+                            <div class="user-cell">
+                                <div class="avatar kk" th:text="${#strings.substring(d.fullName,0,1)}">K</div>
+                                <div>
+                                    <div class="user-name" th:text="${d.fullName}">Name</div>
+                                    <div class="user-email" th:text="${d.email}">email</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td th:text="${d.phone}">-</td>
+                        <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" th:text="${d.address}">-</td>
+                        <td th:text="${d.verificationDocument ?: '—'}">-</td>
+                        <td>
+                            <span class="status-badge status-verified" th:if="${d.isVerified}"><i class="fas fa-circle" style="font-size:.45rem"></i> Verified</span>
+                            <span class="status-badge status-pending" th:unless="${d.isVerified}"><i class="fas fa-circle" style="font-size:.45rem"></i> Pending</span>
+                        </td>
+                        <td th:text="${#temporals.format(d.createdAt, 'dd MMM yyyy')}">-</td>
+                    </tr>
+                    <tr th:if="${donors == null or #lists.isEmpty(donors)}">
+                        <td colspan="6"><div class="empty-state"><i class="fas fa-hand-holding-usd"></i>No KK accounts registered.</div></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ══ BENEFICIARIES TAB ══ -->
+<div class="tab-panel" id="panel-ben">
+    <div class="table-card">
+        <div class="table-card-header">
+            <div class="table-card-title"><i class="fas fa-shield-heart" style="color:#10b981"></i> Beneficiary Accounts</div>
+            <span class="row-count" th:text="${totalBeneficiaries + ' accounts'}">0 accounts</span>
+        </div>
+        <div style="overflow-x:auto;">
+            <table>
+                <thead><tr><th>User</th><th>Phone</th><th>Need Category</th><th>Family</th><th>Monthly Income</th><th>Status</th><th>Joined</th></tr></thead>
+                <tbody>
+                    <tr th:each="b : ${beneficiaries}">
+                        <td>
+                            <div class="user-cell">
+                                <div class="avatar ben" th:text="${#strings.substring(b.fullName,0,1)}">B</div>
+                                <div>
+                                    <div class="user-name" th:text="${b.fullName}">Name</div>
+                                    <div class="user-email" th:text="${b.email}">email</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td th:text="${b.phone}">-</td>
+                        <td th:text="${b.needCategory}">-</td>
+                        <td th:text="${b.familyMembers + ' members'}">-</td>
+                        <td>₹ <span th:text="${#numbers.formatDecimal(b.monthlyIncome ?: 0, 0, 'COMMA', 0, 'POINT')}">0</span></td>
+                        <td>
+                            <span class="status-badge status-verified" th:if="${b.isVerified}"><i class="fas fa-circle" style="font-size:.45rem"></i> Verified</span>
+                            <span class="status-badge status-pending" th:unless="${b.isVerified}"><i class="fas fa-circle" style="font-size:.45rem"></i> Pending</span>
+                        </td>
+                        <td th:text="${#temporals.format(b.createdAt, 'dd MMM yyyy')}">-</td>
+                    </tr>
+                    <tr th:if="${beneficiaries == null or #lists.isEmpty(beneficiaries)}">
+                        <td colspan="7"><div class="empty-state"><i class="fas fa-users"></i>No beneficiaries registered.</div></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ══ NFSA ADMINS TAB ══ -->
+<div class="tab-panel" id="panel-admin">
+    <div class="table-card">
+        <div class="table-card-header">
+            <div class="table-card-title"><i class="fas fa-user-shield" style="color:#f59e0b"></i> NFSA Administrator Accounts</div>
+            <span class="row-count" th:text="${totalAdmins + ' accounts'}">0 accounts</span>
+        </div>
+        <div style="overflow-x:auto;">
+            <table>
+                <thead><tr><th>User</th><th>Phone</th><th>Organization</th><th>Designation</th><th>Employee ID</th><th>Joined</th></tr></thead>
+                <tbody>
+                    <tr th:each="a : ${nfsaAdmins}">
+                        <td>
+                            <div class="user-cell">
+                                <div class="avatar admin" th:text="${#strings.substring(a.fullName,0,1)}">A</div>
+                                <div>
+                                    <div class="user-name" th:text="${a.fullName}">Name</div>
+                                    <div class="user-email" th:text="${a.email}">email</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td th:text="${a.phone}">-</td>
+                        <td th:text="${a.organizationName}">-</td>
+                        <td th:text="${a.designation}">-</td>
+                        <td th:text="${a.employeeId}">-</td>
+                        <td th:text="${#temporals.format(a.createdAt, 'dd MMM yyyy')}">-</td>
+                    </tr>
+                    <tr th:if="${nfsaAdmins == null or #lists.isEmpty(nfsaAdmins)}">
+                        <td colspan="6"><div class="empty-state"><i class="fas fa-user-shield"></i>No NFSA admins registered.</div></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="userEditor" class="user-modal" onclick="if(event.target===this)closeUserEditor()"><div class="user-dialog"><div class="user-dialog-head"><h3><i class="fas fa-user-pen"></i> Edit Registered Account</h3><button type="button" class="modal-close" onclick="closeUserEditor()"><i class="fas fa-times"></i></button></div><form class="user-form" action="/nfsa/users/update" method="post"><input type="hidden" name="role" id="editRole"><input type="hidden" name="userId" id="editId"><div class="form-grid">
+    <div class="form-field"><label>Full Name</label><input required name="fullName" id="editName"></div><div class="form-field"><label>Email Address</label><input required type="email" name="email" id="editEmail"></div><div class="form-field"><label>Phone Number</label><input required name="phone" id="editPhone"></div><div class="form-field"><label>Account Status</label><select name="verified" id="editVerified"><option value="true">Verified</option><option value="false">Pending</option></select></div>
+    <div class="role-fields" id="commonAddress"><div class="form-field span-2"><label>Address</label><input name="address" id="editAddress"></div></div>
+    <div class="role-fields" id="beneficiaryFields"><div class="form-field"><label>Need Category</label><input name="needCategory" id="editNeed"></div><div class="form-field"><label>Family Members</label><input type="number" min="1" name="familyMembers" id="editFamily" value="1"></div><div class="form-field"><label>Monthly Income</label><input type="number" min="0" step="0.01" name="monthlyIncome" id="editIncome" value="0"></div></div>
+    <div class="role-fields" id="adminFields"><div class="form-field"><label>Organization</label><input name="organizationName" id="editOrganization"></div><div class="form-field"><label>Designation</label><input name="designation" id="editDesignation"></div><div class="form-field"><label>Employee ID</label><input name="employeeId" id="editEmployee"></div></div>
+    <div class="form-field span-2"><label>New Password (leave empty to keep current password)</label><input type="password" minlength="6" name="newPassword" placeholder="Enter a new password only when changing it"></div>
+    </div><button class="save-user" type="submit"><i class="fas fa-save"></i> Save Account Changes</button></form></div></div>
+
+<script>
+function openUserEditor(button){const d=button.dataset,role=d.role;document.getElementById('editRole').value=role;document.getElementById('editId').value=d.id;document.getElementById('editName').value=d.name||'';document.getElementById('editEmail').value=d.email||'';document.getElementById('editPhone').value=d.phone||'';document.getElementById('editAddress').value=d.address||'';document.getElementById('editVerified').value=d.verified==='false'?'false':'true';document.getElementById('editNeed').value=d.need||'';document.getElementById('editFamily').value=d.family||1;document.getElementById('editIncome').value=d.income||0;document.getElementById('editOrganization').value=d.organization||'';document.getElementById('editDesignation').value=d.designation||'';document.getElementById('editEmployee').value=d.employee||'';document.getElementById('commonAddress').style.display=role==='admin'?'none':'contents';document.getElementById('beneficiaryFields').style.display=role==='beneficiary'?'contents':'none';document.getElementById('adminFields').style.display=role==='admin'?'contents':'none';document.getElementById('userEditor').classList.add('open')}
+function closeUserEditor(){document.getElementById('userEditor').classList.remove('open')}
+// ── Tab switching ──
+function switchTab(tabId, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + tabId).classList.add('active');
+    btn.classList.add('active');
+    filterTable();
+}
+
+// ── Search + Status filter for All Users tab ──
+function filterTable() {
+    const q      = document.getElementById('searchInput').value.toLowerCase();
+    const status = document.getElementById('statusFilter').value;
+    const activePanel = document.querySelector('.tab-panel.active');
+    const activeId    = activePanel ? activePanel.id : 'panel-all';
+    const rows   = activePanel ? activePanel.querySelectorAll('tr.user-row') : [];
+
+    let visible = 0;
+    rows.forEach(row => {
+        const name  = (row.getAttribute('data-name')   || '').toLowerCase();
+        const email = (row.getAttribute('data-email')  || '').toLowerCase();
+        const phone = (row.querySelector('td:nth-child(3)')?.textContent || '').toLowerCase();
+        const st    = (row.getAttribute('data-status') || '');
+        const matchQ      = !q      || name.includes(q) || email.includes(q) || phone.includes(q);
+        const matchStatus = !status || st === status;
+        const show = matchQ && matchStatus;
+        row.style.display = show ? '' : 'none';
+        if (show) visible++;
+    });
+
+    const countEl = document.getElementById('all-visible');
+    if (countEl) countEl.textContent = visible;
+}
+
+document.getElementById('searchInput').addEventListener('input', filterTable);
+document.getElementById('statusFilter').addEventListener('change', filterTable);
+
+// Initialize count
+document.addEventListener('DOMContentLoaded', function() {
+    const allRows = document.querySelectorAll('#panel-all tr.user-row');
+    const countEl = document.getElementById('all-visible');
+    if (countEl) countEl.textContent = allRows.length;
+});
+</script>
+</div>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beneficiary Login - NGO Fund Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --pink-light:#FFF0F5; --pink-medium:#FFE4E1; --pink-accent:#FFB6C1; --pink-dark:#DB7093; --pink-deep:#C71585; }
+        body { background:linear-gradient(135deg,var(--pink-light) 0%,var(--pink-medium) 100%); min-height:100vh; font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; }
+        .navbar { background:linear-gradient(90deg,var(--pink-dark) 0%,var(--pink-deep) 100%) !important; box-shadow:0 4px 15px rgba(199,21,133,0.3); }
+        .navbar-brand,.nav-link { color:white !important; font-weight:600; }
+        .card { border:none; border-radius:20px; box-shadow:0 10px 30px rgba(219,112,147,0.2); background:white; }
+        .card-header { background:linear-gradient(90deg,var(--pink-accent) 0%,var(--pink-dark) 100%); color:white; border-radius:20px 20px 0 0 !important; font-weight:600; }
+        .btn-primary { background:linear-gradient(90deg,var(--pink-dark) 0%,var(--pink-deep) 100%); border:none; border-radius:25px; padding:10px 30px; font-weight:600; transition:all 0.3s ease; }
+        .btn-primary:hover { transform:scale(1.05); box-shadow:0 5px 20px rgba(199,21,133,0.4); }
+        .form-control { border-radius:15px; border:2px solid var(--pink-accent); padding:12px 20px; transition:all 0.3s ease; }
+        .form-control:focus { border-color:var(--pink-dark); box-shadow:0 0 15px rgba(219,112,147,0.3); }
+        footer { background:linear-gradient(90deg,var(--pink-dark) 0%,var(--pink-deep) 100%); color:white; padding:20px 0; margin-top:50px; }
+        .alert { border-radius:15px; border:none; }
+        .alert-danger { background:linear-gradient(90deg,#f8d7da 0%,#f5c6cb 100%); color:#721c24; }
+        .alert-success { background:linear-gradient(90deg,#d4edda 0%,#c3e6cb 100%); color:#155724; }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+        .floating-icon { animation:float 3s ease-in-out infinite; }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="/index.html"><i class="fas fa-hand-holding-heart me-2 floating-icon"></i>NGO Fund Tracker</a>
+        <a href="/index.html" class="btn btn-light" style="border-radius:25px;"><i class="fas fa-home me-2"></i>Home</a>
+    </div>
+</nav>
+<div class="container py-4">
+    <div id="alertBox"></div>
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card">
+                <div class="card-header text-center py-4">
+                    <i class="fas fa-users fa-3x mb-3 floating-icon"></i>
+                    <h3 class="mb-0">Beneficiary Login</h3>
+                    <p class="mb-0 opacity-75">Secure Beneficiary Access</p>
+                </div>
+                <div class="card-body p-4">
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-envelope me-2" style="color:#DB7093;"></i>Email Address</label>
+                            <input type="email" class="form-control" id="email" required placeholder="beneficiary@email.com">
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label"><i class="fas fa-lock me-2" style="color:#DB7093;"></i>Password</label>
+                            <div class="input-group position-relative">
+                                <input type="password" class="form-control" id="password" required placeholder="Enter your password">
+                                <button type="button" class="btn position-absolute end-0 top-50 translate-middle-y border-0" id="togglePwd" style="z-index:10;background:transparent;cursor:pointer;">
+                                    <i class="fas fa-eye" id="eyeIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login to Dashboard
+                            </button>
+                        </div>
+                    </form>
+                    <div class="text-center mt-4">
+                        <p class="mb-0">Don't have an account?
+                            <a href="/beneficiary/signup.html" style="color:#C71585;font-weight:600;"><i class="fas fa-user-plus me-1"></i>Register here</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <div class="card p-3">
+                    <p class="mb-0"><i class="fas fa-hands-helping me-2" style="color:#DB7093;"></i>Helping communities in need</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<footer class="text-center">
+    <div class="container"><p class="mb-0">NGO Fund Tracker - Transparent Donations, Verified Impact</p></div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('togglePwd').addEventListener('click', function() {
+        const pwd = document.getElementById('password');
+        const icon = document.getElementById('eyeIcon');
+        if (pwd.type === 'password') { pwd.type = 'text'; icon.classList.replace('fa-eye','fa-eye-slash'); }
+        else { pwd.type = 'password'; icon.classList.replace('fa-eye-slash','fa-eye'); }
+    });
+
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Logging in...';
+        const alertBox = document.getElementById('alertBox');
+        alertBox.innerHTML = '';
+        try {
+            const res = await fetch('/api/auth/beneficiary/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: document.getElementById('email').value, password: document.getElementById('password').value })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('userType', 'beneficiary');
+                localStorage.setItem('userData', JSON.stringify(data));
+                alertBox.innerHTML = '<div class="alert alert-success"><i class="fas fa-check-circle me-2"></i>Login successful! Redirecting...</div>';
+                setTimeout(() => { window.location.href = '/beneficiary/dashboard.html'; }, 1000);
+            } else {
+                alertBox.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i>' + (data.error || 'Invalid credentials') + '</div>';
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Login to Dashboard';
+            }
+        } catch (err) {
+            alertBox.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i>Connection error. Please try again.</div>';
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Login to Dashboard';
+        }
+    });
+</script>
+</body>
+</html>

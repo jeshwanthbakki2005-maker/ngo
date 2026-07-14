@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+
+{% block title %}Financial Reports - NGO Fund Tracker{% endblock %}
+
+{% block navbar %}
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="{{ url_for('nfsa_dashboard') }}">
+            <i class="fas fa-hand-holding-heart me-2 floating-icon"></i>NGO Fund Tracker
+        </a>
+        <div class="d-flex align-items-center">
+            <span class="text-white me-3"><i class="fas fa-user-tie me-2"></i>{{ name }}</span>
+            <a href="{{ url_for('logout') }}" class="btn btn-light" style="border-radius: 25px;">
+                <i class="fas fa-sign-out-alt me-2"></i>Logout
+            </a>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <div class="sidebar">
+            <h5 class="mb-4" style="color: #C71585;"><i class="fas fa-bars me-2"></i>NFSA Menu</h5>
+            <a href="{{ url_for('nfsa_dashboard') }}" class="sidebar-link">
+                <i class="fas fa-tachometer-alt"></i>Dashboard Overview
+            </a>
+            <a href="{{ url_for('nfsa_fund_allocation') }}" class="sidebar-link">
+                <i class="fas fa-hand-holding-usd"></i>Fund Allocation
+            </a>
+            <a href="{{ url_for('nfsa_dashboard') }}" class="sidebar-link">
+                <i class="fas fa-user-check"></i>Beneficiary Verification
+            </a>
+            <a href="{{ url_for('nfsa_financial_reports') }}" class="sidebar-link active">
+                <i class="fas fa-chart-bar"></i>Financial Reports
+            </a>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <i class="fas fa-coins stat-icon pulse-icon"></i>
+                    <div class="stat-value">₹{{ "{:,.0f}".format(total_donations) }}</div>
+                    <div class="stat-label">Total Donations Received</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <i class="fas fa-hand-holding-heart stat-icon pulse-icon"></i>
+                    <div class="stat-value">₹{{ "{:,.0f}".format(total_allocated) }}</div>
+                    <div class="stat-label">Total Funds Allocated</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <i class="fas fa-receipt stat-icon pulse-icon"></i>
+                    <div class="stat-value">₹{{ "{:,.0f}".format(total_utilized) }}</div>
+                    <div class="stat-label">Verified Utilization</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-chart-pie me-2"></i>Donations by Purpose
+                    </div>
+                    <div class="card-body">
+                        <canvas id="donationsPieChart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-chart-bar me-2"></i>Allocations by Category
+                    </div>
+                    <div class="card-body">
+                        <canvas id="allocationsBarChart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-percentage me-2"></i>Fund Flow Overview
+            </div>
+            <div class="card-body">
+                <div class="row text-center mb-3">
+                    <div class="col-md-4">
+                        <div class="p-3 rounded" style="background: linear-gradient(135deg, #d4edda, #c3e6cb);">
+                            <i class="fas fa-arrow-down fa-2x mb-2" style="color: #28a745;"></i>
+                            <h5 class="mb-0">₹{{ "{:,.0f}".format(total_donations) }}</h5>
+                            <small>Total Received</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 rounded" style="background: linear-gradient(135deg, #fff3cd, #ffeeba);">
+                            <i class="fas fa-exchange-alt fa-2x mb-2" style="color: #ffc107;"></i>
+                            <h5 class="mb-0">₹{{ "{:,.0f}".format(total_allocated) }}</h5>
+                            <small>Allocated</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 rounded" style="background: linear-gradient(135deg, #cce5ff, #b8daff);">
+                            <i class="fas fa-check-double fa-2x mb-2" style="color: #007bff;"></i>
+                            <h5 class="mb-0">₹{{ "{:,.0f}".format(total_utilized) }}</h5>
+                            <small>Utilized & Verified</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="mb-2"><i class="fas fa-tasks me-2"></i>Allocation Progress</label>
+                    <div class="progress" style="height: 30px;">
+                        {% set alloc_percent = (total_allocated / total_donations * 100) if total_donations > 0 else 0 %}
+                        <div class="progress-bar" style="width: {{ alloc_percent }}%">
+                            {{ "{:.1f}".format(alloc_percent) }}% Allocated
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="mb-2"><i class="fas fa-check-circle me-2"></i>Utilization Progress</label>
+                    <div class="progress" style="height: 30px;">
+                        {% set util_percent = (total_utilized / total_allocated * 100) if total_allocated > 0 else 0 %}
+                        <div class="progress-bar bg-success" style="width: {{ util_percent }}%">
+                            {{ "{:.1f}".format(util_percent) }}% Utilized
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-history me-2"></i>Recent Audit Logs
+            </div>
+            <div class="card-body">
+                {% if recent_logs %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-calendar me-1"></i>Timestamp</th>
+                                <th><i class="fas fa-bolt me-1"></i>Action</th>
+                                <th><i class="fas fa-user me-1"></i>User Type</th>
+                                <th><i class="fas fa-info-circle me-1"></i>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in recent_logs %}
+                            <tr>
+                                <td>{{ log.created_at.strftime('%d %b %Y %H:%M') }}</td>
+                                <td><span class="badge" style="background: linear-gradient(90deg, #DB7093, #C71585);">{{ log.action }}</span></td>
+                                <td>{{ log.user_type|upper }}</td>
+                                <td>{{ log.details or 'N/A' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-clipboard-list fa-3x mb-3" style="color: #FFB6C1;"></i>
+                    <p class="text-muted">No audit logs yet</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const donationLabels = [{% for item in donations_by_purpose %}'{{ item[0] }}'{% if not loop.last %}, {% endif %}{% endfor %}];
+    const donationData = [{% for item in donations_by_purpose %}{{ item[1] }}{% if not loop.last %}, {% endif %}{% endfor %}];
+    
+    const allocationLabels = [{% for item in allocations_by_category %}'{{ item[0] }}'{% if not loop.last %}, {% endif %}{% endfor %}];
+    const allocationData = [{% for item in allocations_by_category %}{{ item[1] }}{% if not loop.last %}, {% endif %}{% endfor %}];
+    
+    const pinkColors = ['#FFB6C1', '#FF69B4', '#DB7093', '#C71585', '#FF1493', '#FFC0CB', '#FFE4E1', '#F08080'];
+    
+    if (donationLabels.length > 0) {
+        new Chart(document.getElementById('donationsPieChart'), {
+            type: 'doughnut',
+            data: {
+                labels: donationLabels,
+                datasets: [{
+                    data: donationData,
+                    backgroundColor: pinkColors,
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    }
+    
+    if (allocationLabels.length > 0) {
+        new Chart(document.getElementById('allocationsBarChart'), {
+            type: 'bar',
+            data: {
+                labels: allocationLabels,
+                datasets: [{
+                    label: 'Amount Allocated',
+                    data: allocationData,
+                    backgroundColor: 'rgba(199, 21, 133, 0.7)',
+                    borderColor: '#C71585',
+                    borderWidth: 2,
+                    borderRadius: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

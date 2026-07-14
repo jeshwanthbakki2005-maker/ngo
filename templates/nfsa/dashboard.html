@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block title %}NFSA Dashboard - NGO Fund Tracker{% endblock %}
+
+{% block navbar %}
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="{{ url_for('nfsa_dashboard') }}">
+            <i class="fas fa-hand-holding-heart me-2 floating-icon"></i>NGO Fund Tracker
+        </a>
+        <div class="d-flex align-items-center">
+            <span class="text-white me-3"><i class="fas fa-user-tie me-2"></i>{{ name }}</span>
+            <a href="{{ url_for('logout') }}" class="btn btn-light" style="border-radius: 25px;">
+                <i class="fas fa-sign-out-alt me-2"></i>Logout
+            </a>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <div class="sidebar">
+            <h5 class="mb-4" style="color: #C71585;"><i class="fas fa-bars me-2"></i>NFSA Menu</h5>
+            <a href="{{ url_for('nfsa_dashboard') }}" class="sidebar-link active">
+                <i class="fas fa-tachometer-alt"></i>Dashboard Overview
+            </a>
+            <a href="{{ url_for('nfsa_fund_allocation') }}" class="sidebar-link">
+                <i class="fas fa-hand-holding-usd"></i>Fund Allocation
+            </a>
+            <a href="{{ url_for('nfsa_dashboard') }}" class="sidebar-link">
+                <i class="fas fa-user-check"></i>Beneficiary Verification
+            </a>
+            <a href="{{ url_for('nfsa_dashboard') }}" class="sidebar-link">
+                <i class="fas fa-file-invoice-dollar"></i>Utilization Reports
+            </a>
+            <a href="{{ url_for('nfsa_password_requests') }}" class="sidebar-link">
+                <i class="fas fa-key"></i>Password Requests
+            </a>
+            <a href="{{ url_for('nfsa_financial_reports') }}" class="sidebar-link">
+                <i class="fas fa-chart-bar"></i>Financial Reports
+            </a>
+        </div>
+    </div>
+
+    <div class="col-md-9">
+        <div class="hero-section mb-4" style="padding: 30px;">
+            <h2><i class="fas fa-chart-line me-2 floating-icon"></i>Welcome, {{ name }}!</h2>
+            <p class="mb-0">Nonprofit Financial System Administrator Dashboard</p>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <i class="fas fa-rupee-sign stat-icon pulse-icon"></i>
+                    <div class="stat-value">₹{{ "{:,.0f}".format(total_donations) }}</div>
+                    <div class="stat-label">Total Donations</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <i class="fas fa-hand-holding-heart stat-icon pulse-icon"></i>
+                    <div class="stat-value">₹{{ "{:,.0f}".format(total_allocated) }}</div>
+                    <div class="stat-label">Total Allocated</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <i class="fas fa-users stat-icon pulse-icon"></i>
+                    <div class="stat-value">{{ total_donors }}</div>
+                    <div class="stat-label">Total Donors</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <i class="fas fa-user-friends stat-icon pulse-icon"></i>
+                    <div class="stat-value">{{ total_beneficiaries }}</div>
+                    <div class="stat-label">Beneficiaries</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="card p-3 text-center">
+                    <h5 style="color: #C71585;"><i class="fas fa-clock me-2"></i>Pending Actions</h5>
+                    <hr>
+                    <div class="d-flex justify-content-around">
+                        <div>
+                            <span class="badge badge-pending">{{ unverified_donors }}</span>
+                            <p class="small mb-0 mt-2">Donors</p>
+                        </div>
+                        <div>
+                            <span class="badge badge-pending">{{ unverified_beneficiaries }}</span>
+                            <p class="small mb-0 mt-2">Beneficiaries</p>
+                        </div>
+                        <div>
+                            <span class="badge badge-pending">{{ pending_allocations }}</span>
+                            <p class="small mb-0 mt-2">Allocations</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card p-3">
+                    <h5 style="color: #C71585;"><i class="fas fa-chart-pie me-2"></i>Fund Utilization</h5>
+                    <div class="progress mt-3">
+                        {% set percent = (total_allocated / total_donations * 100) if total_donations > 0 else 0 %}
+                        <div class="progress-bar" style="width: {{ percent }}%">
+                            {{ "{:.1f}".format(percent) }}% Allocated
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between mt-2">
+                        <small class="text-muted">Available: ₹{{ "{:,.0f}".format(total_donations - total_allocated)
+                            }}</small>
+                        <small class="text-muted">Allocated: ₹{{ "{:,.0f}".format(total_allocated) }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-history me-2"></i>Recent Donations
+            </div>
+            <div class="card-body">
+                {% if recent_donations %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-hashtag me-1"></i>ID</th>
+                                <th><i class="fas fa-user me-1"></i>Donor</th>
+                                <th><i class="fas fa-rupee-sign me-1"></i>Amount</th>
+                                <th><i class="fas fa-bullseye me-1"></i>Purpose</th>
+                                <th><i class="fas fa-calendar me-1"></i>Date</th>
+                                <th><i class="fas fa-info-circle me-1"></i>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for donation in recent_donations %}
+                            <tr>
+                                <td>{{ donation.transaction_id[:10] }}...</td>
+                                <td>{{ donation.donor.full_name }}</td>
+                                <td>₹{{ "{:,.2f}".format(donation.amount) }}</td>
+                                <td>{{ donation.purpose }}</td>
+                                <td>{{ donation.created_at.strftime('%d %b %Y') }}</td>
+                                <td><span class="badge badge-verified">{{ donation.status }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-inbox fa-3x mb-3" style="color: #FFB6C1;"></i>
+                    <p class="text-muted">No donations yet</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

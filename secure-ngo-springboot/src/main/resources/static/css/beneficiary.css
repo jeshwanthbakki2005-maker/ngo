@@ -1,0 +1,37 @@
+:root{
+  --bg:#f4fbff;
+  --card:#ffffff;
+  --accent:#2fa4a8;
+  --accent-2:#3aa97b;
+  --muted:#6b7a85;
+  --success:#28a745;
+}
+body{background:linear-gradient(180deg,var(--bg),#e9f8f7);font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;color:#123;}
+.ben-container{padding:24px}
+.ben-hero{background:var(--card);padding:28px;border-radius:14px;box-shadow:0 8px 24px rgba(16,78,74,0.06);margin-bottom:18px}
+.ben-hero h1{margin:0;color:var(--accent-2)}
+.ben-grid{display:grid;grid-template-columns:260px 1fr;gap:20px}
+.ben-sidebar{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 8px 30px rgba(16,78,74,0.06)}
+.ben-sidebar h4{color:var(--accent);margin-bottom:12px}
+.ben-link{display:block;padding:10px 12px;color:var(--accent-2);text-decoration:none;border-radius:8px;margin-bottom:8px}
+.ben-link.active{background:linear-gradient(90deg,rgba(47,164,168,0.08),rgba(58,169,123,0.04));font-weight:700}
+.ben-main .card{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 8px 24px rgba(16,78,74,0.04);margin-bottom:16px}
+.stats{display:flex;gap:12px;flex-wrap:wrap}
+.stat-card{flex:1;min-width:150px;padding:18px;border-radius:12px;border-left:6px solid var(--accent);}
+.stat-card h3{margin:0;color:var(--accent-2)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-control{width:100%;padding:12px;border-radius:10px;border:1px solid #d8eef0}
+.file-preview{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.file-preview img{width:120px;height:80px;object-fit:cover;border-radius:8px;border:1px solid #e6f6f6}
+.badge-status{display:inline-block;padding:6px 10px;border-radius:12px;font-weight:600}
+.badge-pending{background:#fff3cd;color:#856404}
+.badge-approved{background:#d4edda;color:#155724}
+.badge-rejected{background:#f8d7da;color:#721c24}
+.btn-primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:white;border:none;padding:12px 18px;border-radius:12px}
+.small-note{color:var(--muted);font-size:0.95rem}
+/* Responsive */
+@media(max-width:900px){.ben-grid{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}.ben-sidebar{order:2}} 
+/* Dark mode support */
+body.dark{background:#071823;color:#eaf7f6}
+body.dark .ben-sidebar, body.dark .ben-main .card, body.dark .ben-hero{background:#0b2a2a}
+body.dark .ben-link{color:#bfeff0}

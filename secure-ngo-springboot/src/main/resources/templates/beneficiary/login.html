@@ -1,0 +1,44 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: layout(~{::title}, ~{::content})}">
+
+<head><title th:fragment="title">Beneficiary Login - NGO Fund Tracker</title></head>
+
+<body><div th:fragment="content">
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card">
+            <div class="card-header text-center py-5" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border-radius: 12px 12px 0 0;">
+                <i class="fas fa-hand-holding-heart fa-3x mb-3 floating-icon text-white"></i>
+                <h3 class="mb-0 text-white">Beneficiary Login</h3>
+                <p class="mb-0 text-white opacity-75">Access your support dashboard</p>
+            </div>
+            <div class="card-body p-4">
+                <div th:if="${success}" class="alert alert-success">[[${success}]]</div>
+                <div th:if="${error != false && error != null}" class="alert alert-danger">[[${error}]]</div>
+                <form method="POST" th:action="@{/auth/beneficiary/login}">
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-envelope me-2" style="color: #10b981;"></i>Email Address</label>
+                        <input type="email" class="form-control" name="email" required placeholder="beneficiary@example.com">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label"><i class="fas fa-lock me-2" style="color: #10b981;"></i>Password</label>
+                        <input type="password" class="form-control" name="password" required placeholder="Enter your password">
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg" style="background-color: #10b981; border: none;">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login securely
+                        </button>
+                    </div>
+                </form>
+                <div class="text-center mt-4">
+                    <p class="mb-0">Don't have an account?
+                        <a th:href="@{/auth/beneficiary/signup}" style="color: #059669; font-weight: 600;">
+                            <i class="fas fa-user-plus me-1"></i>Register here
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div></body>
+</html>

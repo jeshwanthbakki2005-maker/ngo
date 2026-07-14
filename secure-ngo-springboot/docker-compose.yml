@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  ngo-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: secure-ngo-donation
+    ports:
+      - "5000:5000"
+    environment:
+      - SERVER_PORT=5000
+      - SPRING_DATASOURCE_URL=jdbc:h2:/app/data/charity_guard
+      - SPRING_DATASOURCE_USERNAME=sa
+      - SPRING_DATASOURCE_PASSWORD=
+      - JWT_SECRET=ngo-secure-key-2024-this-is-a-long-secret-key-for-jwt-token-generation
+      - JWT_EXPIRATION=86400000
+      - APP_FRONTEND_URL=http://localhost:5000
+      - MAIL_ENABLED=false
+      - MAIL_USERNAME=
+      - MAIL_PASSWORD=
+      - SPRING_PROFILES_ACTIVE=dev
+    volumes:
+      - ngo-data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  ngo-data:
+    name: secure-ngo-donation-data

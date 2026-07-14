@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beneficiary Dashboard - NGO Fund Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: #f0f4ff; color: #1e293b; display: flex; height: 100vh; overflow: hidden; }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 240px; min-width: 240px; background: #0f172a;
+            display: flex; flex-direction: column; height: 100vh; overflow-y: auto;
+            box-shadow: 4px 0 20px rgba(0,0,0,.3);
+        }
+        .sidebar-brand {
+            padding: 20px 18px 16px;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+        }
+        .sidebar-brand .brand-icon {
+            width: 42px; height: 42px; border-radius: 10px;
+            background: linear-gradient(135deg,#10b981,#059669);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; color: white; margin-bottom: 8px;
+        }
+        .sidebar-brand h5 { color: #fff; font-weight: 700; font-size: .95rem; margin: 0; }
+        .sidebar-brand small { color: #10b981; font-size: .75rem; }
+
+        .sidebar nav { flex: 1; padding: 12px 10px; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+            border-radius: 8px; color: #94a3b8; font-size: .875rem; font-weight: 500;
+            cursor: pointer; transition: all .2s; text-decoration: none; margin-bottom: 2px; }
+        .nav-item:hover { background: rgba(255,255,255,.07); color: #fff; }
+        .nav-item.active { background: linear-gradient(135deg,#10b981,#059669); color: #fff; }
+        .nav-item i { width: 18px; text-align: center; font-size: .9rem; }
+        .nav-badge { margin-left: auto; background: #ef4444; color: #fff;
+            border-radius: 10px; padding: 1px 7px; font-size: .7rem; font-weight: 700; }
+
+        .sidebar-footer {
+            padding: 14px 10px;
+            border-top: 1px solid rgba(255,255,255,.08);
+        }
+        .sidebar-help {
+            background: rgba(16,185,129,.12); border: 1px solid rgba(16,185,129,.25);
+            border-radius: 10px; padding: 14px; text-align: center;
+        }
+        .sidebar-help i { font-size: 1.6rem; color: #10b981; margin-bottom: 6px; }
+        .sidebar-help p { color: #94a3b8; font-size: .75rem; margin: 4px 0 8px; line-height: 1.4; }
+        .sidebar-help small { color: #64748b; font-size: .7rem; font-weight: 600; }
+        .btn-logout { display: flex; align-items: center; gap: 8px; padding: 9px 14px;
+            border-radius: 8px; color: #f87171; font-size: .875rem; font-weight: 500;
+            text-decoration: none; margin-top: 8px; transition: background .2s; }
+        .btn-logout:hover { background: rgba(239,68,68,.1); color: #ef4444; }
+
+        /* ── Main ── */
+        .main-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* Topbar */
+        .topbar {
+            background: #fff; padding: 12px 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,.07);
+            display: flex; align-items: center; gap: 16px; z-index: 10;
+        }
+        .menu-btn { background: none; border: none; font-size: 1.1rem; color: #64748b; cursor: pointer; }
+        .topbar-title { font-weight: 700; font-size: 1.05rem; color: #0f172a; flex: 1; }
+        .search-box {
+            display: flex; align-items: center; gap: 8px;
+            background: #f8fafc; border: 1px solid #e2e8f0;
+            border-radius: 8px; padding: 7px 14px; flex: 0 0 240px;
+        }
+        .search-box input { border: none; background: none; outline: none; font-size: .85rem; color: #64748b; width: 100%; }
+        .topbar-icons { display: flex; align-items: center; gap: 10px; }
+        .icon-btn { position: relative; background: #f8fafc; border: 1px solid #e2e8f0;
+            border-radius: 8px; width: 36px; height: 36px; display: flex;
+            align-items: center; justify-content: center; cursor: pointer; color: #64748b; }
+        .icon-btn .badge { position: absolute; top: -5px; right: -5px; background: #ef4444;
+            color: white; border-radius: 50%; width: 18px; height: 18px;
+            display: flex; align-items: center; justify-content: center; font-size: .65rem; font-weight: 700; }
+        .header-action{position:relative}.notice-menu{display:none;position:absolute;right:0;top:46px;width:330px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 16px 38px rgba(15,23,42,.18);z-index:100;padding:10px}.notice-menu.open{display:block}.notice-head{display:flex;justify-content:space-between;padding:7px 8px 10px;font-size:.78rem;font-weight:800}.notice-item{display:flex;gap:9px;padding:9px 8px;border-top:1px solid #f1f5f9;text-decoration:none;color:#1e293b}.notice-item:hover{background:#f8fafc}.notice-item i{color:#10b981;margin-top:3px}.notice-item strong{font-size:.72rem;display:block}.notice-item small{display:block;color:#64748b;font-size:.64rem;line-height:1.4;margin-top:2px}.notice-empty{text-align:center;color:#94a3b8;font-size:.72rem;padding:20px}
+        .user-pill { display: flex; align-items: center; gap: 10px;
+            background: #f8fafc; border: 1px solid #e2e8f0;
+            border-radius: 10px; padding: 6px 12px; cursor: pointer; }
+        .user-avatar { width: 32px; height: 32px; border-radius: 50%;
+            background: linear-gradient(135deg,#10b981,#059669);
+            display: flex; align-items: center; justify-content: center; color: #fff; font-size: .85rem; }
+        .user-info { line-height: 1.2; }
+        .user-info strong { font-size: .85rem; display: block; }
+        .user-info small { color: #64748b; font-size: .72rem; }
+
+        /* Content Scroll */
+        .content-area { flex: 1; display: flex; overflow: hidden; }
+        .center-col { flex: 1; overflow-y: auto; padding: 20px 20px 20px 20px; }
+        .right-col { width: 280px; min-width: 280px; overflow-y: auto; padding: 20px 20px 20px 0; }
+
+        /* Welcome Banner */
+        .welcome-banner {
+            background: linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%);
+            border-radius: 14px; padding: 20px 24px;
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 18px; color: white; position: relative; overflow: hidden;
+        }
+        .welcome-banner::after {
+            content: ''; position: absolute; right: -40px; top: -40px;
+            width: 180px; height: 180px; border-radius: 50%;
+            background: rgba(16,185,129,.08);
+        }
+        .welcome-banner .check-icon {
+            width: 48px; height: 48px; border-radius: 50%;
+            background: linear-gradient(135deg,#10b981,#059669);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; margin-right: 14px; flex-shrink: 0;
+        }
+        .welcome-banner h4 { font-size: 1.1rem; font-weight: 700; margin: 0 0 3px; }
+        .welcome-banner p { font-size: .82rem; color: #94a3b8; margin: 0; }
+        .welcome-banner .banner-img { font-size: 3rem; opacity: .7; }
+
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 18px; }
+        .stat-card {
+            background: white; border-radius: 12px; padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.05); border: 1px solid #f1f5f9;
+        }
+        .stat-card .stat-label { font-size: .75rem; font-weight: 600; color: #64748b; margin-bottom: 6px; }
+        .stat-card .stat-value { font-size: 1.6rem; font-weight: 800; color: #0f172a; }
+        .stat-card .stat-sub { font-size: .72rem; color: #94a3b8; margin-top: 4px; }
+        .stat-icon-wrap { width: 40px; height: 40px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; font-size: 1rem; margin-bottom: 10px; }
+
+        /* Quick Actions */
+        .section-title { font-size: .95rem; font-weight: 700; color: #0f172a; margin-bottom: 12px; }
+        .quick-actions { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 18px; }
+        .action-card {
+            background: white; border-radius: 12px; padding: 16px; text-align: center;
+            border: 1px solid #f1f5f9; box-shadow: 0 2px 8px rgba(0,0,0,.04);
+            cursor: pointer; transition: all .2s; text-decoration: none; color: inherit;
+        }
+        .action-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.1); color: inherit; }
+        .action-card .action-icon { width: 44px; height: 44px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; margin: 0 auto 8px; }
+        .action-card p { font-size: .78rem; font-weight: 600; color: #0f172a; margin: 0; }
+
+        /* Table */
+        .table-card { background: white; border-radius: 12px; padding: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.05); border: 1px solid #f1f5f9; }
+        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+        .btn-view-all { background: none; border: 1px solid #e2e8f0;
+            border-radius: 8px; padding: 6px 14px; font-size: .78rem;
+            font-weight: 600; color: #64748b; cursor: pointer; }
+        .custom-table { width: 100%; border-collapse: collapse; }
+        .custom-table th { font-size: .72rem; font-weight: 700; color: #64748b;
+            text-transform: uppercase; letter-spacing: .04em;
+            padding: 8px 10px; border-bottom: 2px solid #f1f5f9; }
+        .custom-table td { font-size: .82rem; padding: 10px; border-bottom: 1px solid #f8fafc; color: #334155; }
+        .custom-table tr:last-child td { border-bottom: none; }
+        .badge-status { padding: 3px 10px; border-radius: 20px; font-size: .72rem; font-weight: 600; }
+        .badge-approved { background: #dcfce7; color: #166534; }
+        .badge-pending { background: #fef3c7; color: #92400e; }
+        .btn-details { background: none; border: 1px solid #e2e8f0; border-radius: 6px;
+            padding: 4px 10px; font-size: .75rem; font-weight: 600; color: #64748b; cursor: pointer; }
+        .hint { font-size: .72rem; color: #94a3b8; margin-top: 10px; }
+        .hint i { color: #60a5fa; margin-right: 4px; }
+
+        /* Right panel cards */
+        .panel-card { background: white; border-radius: 12px; padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,.05); border: 1px solid #f1f5f9; margin-bottom: 14px; }
+        .panel-card h6 { font-size: .85rem; font-weight: 700; color: #0f172a; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 6px; }
+        /* Alert panel */
+        .alert-box { background: #fff5f5; border: 1px solid #fecaca;
+            border-radius: 8px; padding: 12px; margin-bottom: 8px; }
+        .alert-box p { font-size: .78rem; color: #dc2626; margin: 0 0 8px; line-height: 1.4; }
+        .btn-alert { background: #dc2626; color: white; border: none; border-radius: 6px;
+            padding: 6px 14px; font-size: .75rem; font-weight: 700; cursor: pointer; width: 100%; }
+        /* Funds panel */
+        .fund-row { display: flex; justify-content: space-between; align-items: center;
+            padding: 7px 0; border-bottom: 1px solid #f8fafc; font-size: .8rem; }
+        .fund-row:last-child { border-bottom: none; }
+        .fund-from { color: #475569; }
+        .fund-amount { font-weight: 700; color: #0f172a; }
+        .btn-green { background: linear-gradient(135deg,#10b981,#059669); color: white;
+            border: none; border-radius: 8px; padding: 9px; font-size: .78rem;
+            font-weight: 700; cursor: pointer; width: 100%; margin-top: 10px; }
+        /* empty state */
+        .empty-row td { text-align: center; color: #94a3b8; padding: 24px; font-size: .85rem; }
+    </style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<div class="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-icon"><i class="fas fa-hands-holding-circle"></i></div>
+        <h5>Secure Disaster<br>Relief Platform</h5>
+        <small>Beneficiary Portal</small>
+    </div>
+    <nav>
+        <a href="/beneficiary/dashboard" class="nav-item active">
+            <i class="fas fa-home"></i> Dashboard
+        </a>
+        <a href="/beneficiary/profile" class="nav-item">
+            <i class="fas fa-user-circle"></i> My Profile
+        </a>
+        <a href="/beneficiary/my-requests" class="nav-item">
+            <i class="fas fa-list-alt"></i> My Requests
+        </a>
+        <a href="/beneficiary/funds-received" class="nav-item">
+            <i class="fas fa-coins"></i> Funds Received
+        </a>
+        <a href="/beneficiary/relief-materials" class="nav-item">
+            <i class="fas fa-box-open"></i> Relief Materials
+        </a>
+        <a href="/beneficiary/campaigns" class="nav-item">
+            <i class="fas fa-bullhorn"></i> Campaigns
+        </a>
+        <a href="/beneficiary/notifications" class="nav-item">
+            <i class="fas fa-bell"></i> Notifications
+        </a>
+        <a href="/beneficiary/support-tickets" class="nav-item">
+            <i class="fas fa-ticket-alt"></i> Support Tickets
+        </a>
+        <a href="/beneficiary/settings" class="nav-item">
+            <i class="fas fa-cog"></i> Settings
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="sidebar-help">
+            <i class="fas fa-hands-helping"></i>
+            <p>We are here to help you in your difficult times.</p>
+            <small>Stay strong, stay safe.</small>
+        </div>
+        <a href="/auth/logout" class="btn-logout">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </div>
+</div>
+
+<!-- ── Main Wrapper ── -->
+<div class="main-wrap">
+
+    <!-- Topbar -->
+    <div class="topbar">
+        <button class="menu-btn"><i class="fas fa-bars"></i></button>
+        <span class="topbar-title">Dashboard</span>
+        <div class="search-box">
+            <i class="fas fa-search" style="color:#94a3b8;"></i>
+            <input type="text" placeholder="Search requests, donations...">
+        </div>
+        <div class="topbar-icons">
+            <div class="header-action">
+            <button type="button" class="icon-btn" onclick="toggleNotificationMenu(event)" aria-label="Notifications">
+                <i class="fas fa-bell"></i>
+                <span id="notificationBadge" class="badge" th:if="${notificationCount != null and notificationCount > 0}" th:data-total="${notificationCount}" th:text="${notificationCount}">0</span>
+            </button>
+            <div id="notificationMenu" class="notice-menu"><div class="notice-head"><span>Notifications</span><a href="/beneficiary/notifications" style="color:#10b981;text-decoration:none">View all</a></div><a class="notice-item" th:each="notice:${headerNotifications}" th:href="${notice.link}"><i class="fas" th:classappend="${notice.type == 'material' ? 'fa-box' : (notice.type == 'disaster' ? 'fa-triangle-exclamation' : 'fa-shield-alt')}"></i><span><strong th:text="${notice.title}">Notification</strong><small th:text="${notice.message}">Details</small></span></a><div class="notice-empty" th:if="${headerNotifications == null or #lists.isEmpty(headerNotifications)}">No notifications.</div></div>
+            </div>
+            <div class="header-action">
+            <button type="button" class="icon-btn" onclick="toggleMessageMenu(event)" aria-label="Campaign messages">
+                <i class="fas fa-envelope"></i>
+                <span id="messageBadge" class="badge" th:if="${messageCount != null and messageCount > 0}" th:data-total="${messageCount}" th:text="${messageCount}">0</span>
+            </button>
+            <div id="messageMenu" class="notice-menu"><div class="notice-head"><span>Campaign Updates</span><a href="/beneficiary/campaigns" style="color:#10b981;text-decoration:none">View all</a></div><a class="notice-item" th:each="campaign:${headerMessages}" href="/beneficiary/campaigns"><i class="fas fa-bullhorn"></i><span><strong th:text="|${#strings.capitalize(campaign.disasterType)} campaign added|">Campaign added</strong><small th:text="|${campaign.location}${campaign.state != null ? ', ' + campaign.state : ''} • ${#strings.capitalize(campaign.status)} • ${#temporals.format(campaign.createdAt,'dd MMM yyyy')}|">Campaign details</small></span></a><div class="notice-empty" th:if="${headerMessages == null or #lists.isEmpty(headerMessages)}">No campaign updates.</div></div>
+            </div>
+        </div>
+        <div class="user-pill">
+            <div class="user-avatar"><i class="fas fa-user"></i></div>
+            <div class="user-info">
+                <strong th:text="${beneficiary != null ? beneficiary.fullName : 'User'}">User</strong>
+                <small>Beneficiary <i class="fas fa-chevron-down" style="font-size:.6rem;"></i></small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content-area">
+
+        <!-- Center Column -->
+        <div class="center-col">
+
+            <!-- Welcome Banner -->
+            <div class="welcome-banner">
+                <div class="d-flex align-items-center">
+                    <div class="check-icon"><i class="fas fa-check"></i></div>
+                    <div>
+                        <h4>Welcome back, <span th:text="${beneficiary != null ? beneficiary.fullName : 'User'}">User</span>!</h4>
+                        <p>We are here to support you. Stay strong!</p>
+                    </div>
+                </div>
+                <div class="banner-img">🏘️</div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon-wrap" style="background:#eff6ff; color:#3b82f6;">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div class="stat-label">Total Requests</div>
+                    <div class="stat-value" th:text="${total_requests != null ? total_requests : 0}">0</div>
+                    <div class="stat-sub">All time requests</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon-wrap" style="background:#f0fdf4; color:#22c55e;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-label">Approved Requests</div>
+                    <div class="stat-value" th:text="${approved_requests != null ? approved_requests : 0}">0</div>
+                    <div class="stat-sub">Requests approved</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon-wrap" style="background:#fffbeb; color:#f59e0b;">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-label">Pending Requests</div>
+                    <div class="stat-value" th:text="${pending_reports != null ? pending_reports : 0}">0</div>
+                    <div class="stat-sub">Requests pending</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon-wrap" style="background:#fdf4ff; color:#a855f7;">
+                        <i class="fas fa-hand-holding-usd"></i>
+                    </div>
+                    <div class="stat-label">Funds Received</div>
+                    <div class="stat-value">&#8377;<span th:text="${#numbers.formatDecimal(total_received ?: 0,0,'COMMA',0,'POINT')}">0</span></div>
+                    <div class="stat-sub">Total amount received</div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="section-title">Quick Actions</div>
+            <div class="quick-actions">
+                <a href="/beneficiary/profile" class="action-card">
+                    <div class="action-icon" style="background:#f0fdf4; color:#22c55e;">
+                        <i class="fas fa-upload"></i>
+                    </div>
+                    <p>Upload Documents</p>
+                </a>
+                <a href="/beneficiary/campaigns#reportForm" class="action-card">
+                    <div class="action-icon" style="background:#fffbeb; color:#f59e0b;">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <p>Update Disaster Information</p>
+                </a>
+                <a href="/beneficiary/support-tickets" class="action-card">
+                    <div class="action-icon" style="background:#fff5f5; color:#ef4444;">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <p>Contact Support</p>
+                </a>
+            </div>
+
+            <!-- Active and Completed Campaigns -->
+            <div class="section-title" style="display:flex;justify-content:space-between;align-items:center"><span>Disaster Campaigns</span><a href="/beneficiary/campaigns" style="font-size:.75rem;color:#10b981;text-decoration:none">View All <i class="fas fa-arrow-right"></i></a></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+                <div class="table-card" style="margin:0;padding:16px">
+                    <div style="font-size:.85rem;font-weight:800;color:#059669;margin-bottom:12px"><i class="fas fa-satellite-dish"></i> Active Campaigns</div>
+                    <div th:each="campaign:${activeDashboardCampaigns}" style="display:grid;grid-template-columns:58px 1fr;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid #eef2f7">
+                        <img th:if="${campaign.photoBase64 != null}" th:src="|data:image/jpeg;base64,${campaign.photoBase64}|" style="width:58px;height:52px;object-fit:cover;border-radius:8px" alt="Campaign"><img th:unless="${campaign.photoBase64 != null}" src="/images/flood_disaster.png" style="width:58px;height:52px;object-fit:cover;border-radius:8px" alt="Campaign">
+                        <div style="min-width:0"><div style="font-size:.74rem;font-weight:800;text-transform:capitalize" th:text="|${campaign.disasterType} in ${campaign.location}|">Campaign</div><div style="font-size:.65rem;color:#64748b;margin-top:3px">&#8377;<span th:text="${#numbers.formatDecimal(campaign.amountRaised ?: 0,0,'COMMA',0,'POINT')}">0</span> / &#8377;<span th:text="${#numbers.formatDecimal(campaign.requiredAmount ?: 0,0,'COMMA',0,'POINT')}">0</span></div><span style="font-size:.6rem;color:#059669;font-weight:800">ACTIVE</span></div>
+                    </div><div th:if="${activeDashboardCampaigns == null or #lists.isEmpty(activeDashboardCampaigns)}" style="font-size:.72rem;color:#94a3b8;padding:14px;text-align:center">No active campaigns.</div>
+                </div>
+                <div class="table-card" style="margin:0;padding:16px">
+                    <div style="font-size:.85rem;font-weight:800;color:#6366f1;margin-bottom:12px"><i class="fas fa-flag-checkered"></i> Completed Campaigns</div>
+                    <div th:each="campaign:${completedDashboardCampaigns}" style="display:grid;grid-template-columns:58px 1fr;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid #eef2f7">
+                        <img th:if="${campaign.photoBase64 != null}" th:src="|data:image/jpeg;base64,${campaign.photoBase64}|" style="width:58px;height:52px;object-fit:cover;border-radius:8px" alt="Completed"><img th:unless="${campaign.photoBase64 != null}" src="/images/flood_disaster.png" style="width:58px;height:52px;object-fit:cover;border-radius:8px" alt="Completed">
+                        <div style="min-width:0"><div style="font-size:.74rem;font-weight:800;text-transform:capitalize" th:text="|${campaign.disasterType} in ${campaign.location}|">Campaign</div><div style="font-size:.65rem;color:#64748b;margin-top:3px" th:text="|${campaign.familiesAffected ?: 0} families supported|">Families</div><span style="font-size:.6rem;color:#6366f1;font-weight:800">COMPLETED</span></div>
+                    </div><div th:if="${completedDashboardCampaigns == null or #lists.isEmpty(completedDashboardCampaigns)}" style="font-size:.72rem;color:#94a3b8;padding:14px;text-align:center">No completed campaigns yet.</div>
+                </div>
+            </div>
+
+            <!-- Requests Table -->
+            <div class="table-card">
+                <div class="table-header">
+                    <span class="section-title mb-0">My Requests</span>
+                    <button class="btn-view-all" onclick="window.location='/beneficiary/my-requests'">View All Requests</button>
+                </div>
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Request ID</th>
+                            <th>Purpose</th>
+                            <th>Submitted On</th>
+                            <th>Status</th>
+                            <th>Amount</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody th:if="${dashboardRequests != null and !#lists.isEmpty(dashboardRequests)}">
+                        <tr th:each="request : ${dashboardRequests}">
+                            <td>#<span th:text="${request.id}">001</span><div style="font-size:.65rem;color:#94a3b8" th:text="${request.kind}">Type</div></td>
+                            <td th:text="${#strings.capitalize(request.purpose)}">-</td>
+                            <td th:text="${#temporals.format(request.date, 'dd MMM yyyy')}">-</td>
+                            <td>
+                                <span class="badge-status"
+                                      th:classappend="${request.status == 'active' or request.status == 'approved' or request.status == 'delivered'} ? 'badge-approved' : 'badge-pending'"
+                                      th:text="${request.status == 'active' ? 'Approved' : #strings.capitalize(request.status)}">Pending</span>
+                            </td>
+                            <td><span th:if="${request.kind == 'Disaster Report'}">&#8377;<span th:text="${#numbers.formatDecimal(request.value ?: 0,0,'COMMA',0,'POINT')}">0</span></span><span th:if="${request.kind == 'Material Request'}" th:text="|${request.value} items|">0 items</span></td>
+                            <td><button class="btn-details" onclick="window.location='/beneficiary/my-requests'">View Details</button></td>
+                        </tr>
+                    </tbody>
+                    <tbody th:if="${dashboardRequests == null or #lists.isEmpty(dashboardRequests)}">
+                        <tr class="empty-row">
+                            <td colspan="6"><i class="fas fa-inbox me-2"></i>No requests found yet. Submit your first relief request.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="hint"><i class="fas fa-info-circle"></i>You can track all your requests and their status here.</p>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="right-col">
+
+            <!-- Account Status (Emergency Alert style) -->
+            <div class="panel-card" th:if="${beneficiary != null and !beneficiary.isVerified}">
+                <h6><i class="fas fa-bell" style="color:#ef4444;"></i> Verification Alert</h6>
+                <div class="alert-box">
+                    <p>Your account is <strong>pending verification</strong>. Our admin team is reviewing your profile. You'll be notified once approved.</p>
+                    <button class="btn-alert" onclick="window.location='/beneficiary/dashboard'">Refresh Status</button>
+                </div>
+            </div>
+            <div class="panel-card" th:if="${beneficiary != null and beneficiary.isVerified}">
+                <h6><i class="fas fa-shield-alt" style="color:#10b981;"></i> Account Verified</h6>
+                <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:12px; text-align:center;">
+                    <i class="fas fa-check-circle fa-2x text-success mb-2 d-block"></i>
+                    <p style="font-size:.78rem; color:#166534; margin:0; font-weight:600;">
+                        Your account is verified! You are eligible to receive funds.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Relief Materials -->
+            <div class="panel-card">
+                <h6><i class="fas fa-gift" style="color:#8b5cf6;"></i> Relief Materials Received</h6>
+                <div>
+                    <div style="font-size:.8rem; color:#475569;">
+                        <div class="d-flex align-items-center gap-2 mb-2" th:each="entry:${materialsSummary}"><i class="fas fa-check-circle text-success"></i><span th:text="${#strings.capitalize(entry.key)}">Material</span><strong style="margin-left:auto" th:text="|${entry.value} items|">0</strong></div>
+                        <div th:if="${materialsSummary == null or #maps.isEmpty(materialsSummary)}" style="text-align:center;color:#94a3b8;padding:12px 0">No materials pledged yet.</div>
+                    </div>
+                    <button class="btn-green" onclick="window.location='/beneficiary/funds-received'">View All Materials (<span th:text="${materialItemsTotal ?: 0}">0</span>)</button>
+                </div>
+            </div>
+
+            <!-- Recent Funds Received -->
+            <div class="panel-card">
+                <h6><i class="fas fa-rupee-sign" style="color:#10b981;"></i> Recent Funds Received</h6>
+                <div th:if="${recentFundTransactions != null and !#lists.isEmpty(recentFundTransactions)}">
+                    <div style="display:flex; justify-content:space-between; font-size:.72rem; font-weight:700; color:#94a3b8; margin-bottom:6px;">
+                        <span>FROM</span><span>AMOUNT</span>
+                    </div>
+                    <div class="fund-row" th:each="transaction : ${recentFundTransactions}">
+                        <span class="fund-from" th:text="${transaction.donorName ?: 'Donor #' + transaction.donorId}">Donor</span>
+                        <span class="fund-amount">&#8377;<span th:text="${#numbers.formatDecimal(transaction.amount ?: 0,0,'COMMA',0,'POINT')}">0</span></span>
+                    </div>
+                </div>
+                <div th:if="${recentFundTransactions == null or #lists.isEmpty(recentFundTransactions)}"
+                     style="text-align:center; color:#94a3b8; font-size:.8rem; padding:16px 0;">
+                    <i class="fas fa-coins fa-2x mb-2 d-block" style="color:#e2e8f0;"></i>
+                    No funds received yet
+                </div>
+                <button class="btn-green" onclick="window.location='/beneficiary/funds-received'">View All Transactions</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function refreshNotificationBadge(){const badge=document.getElementById('notificationBadge');if(!badge)return;const total=Number(badge.dataset.total||0),seen=Number(localStorage.getItem('beneficiaryNotificationsSeen')||0),unread=Math.max(0,total-seen);badge.textContent=unread;badge.style.display=unread>0?'flex':'none'}
+function toggleNotificationMenu(event){event.stopPropagation();const menu=document.getElementById('notificationMenu');menu.classList.toggle('open');if(menu.classList.contains('open')){const badge=document.getElementById('notificationBadge');localStorage.setItem('beneficiaryNotificationsSeen',badge?badge.dataset.total:'0');refreshNotificationBadge()}}
+function refreshMessageBadge(){const badge=document.getElementById('messageBadge');if(!badge)return;const total=Number(badge.dataset.total||0),seen=Number(localStorage.getItem('beneficiaryCampaignMessagesSeen')||0),unread=Math.max(0,total-seen);badge.textContent=unread;badge.style.display=unread>0?'flex':'none'}
+function toggleMessageMenu(event){event.stopPropagation();const menu=document.getElementById('messageMenu');menu.classList.toggle('open');if(menu.classList.contains('open')){const badge=document.getElementById('messageBadge');localStorage.setItem('beneficiaryCampaignMessagesSeen',badge?badge.dataset.total:'0');refreshMessageBadge()}}
+document.addEventListener('click',function(){const notice=document.getElementById('notificationMenu'),messages=document.getElementById('messageMenu');if(notice)notice.classList.remove('open');if(messages)messages.classList.remove('open')});refreshNotificationBadge();refreshMessageBadge();
+</script>
+</body>
+</html>

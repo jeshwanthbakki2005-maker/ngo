@@ -1,0 +1,51 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base :: layout(~{::title}, ~{::content})}">
+
+<head><title th:fragment="title">Verification - NGO Fund Tracker</title></head>
+
+<body><div th:fragment="content">
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold" style="color: var(--pink-deep);">Multi-Level Verification</h1>
+        <p class="lead text-muted w-75 mx-auto">Ensuring that every user and every transaction is legitimate and
+            authorized.</p>
+    </div>
+
+    <div class="row g-5">
+        <div class="col-md-4">
+            <div class="stat-card h-100">
+                <i class="fas fa-home stat-icon mb-3"></i>
+                <h3>Beneficiary Verification</h3>
+                <p class="text-muted">We strictly verify beneficiaries to ensure aid reaches those who truly need it.
+                    This includes documentation checks and need assessment.</p>
+                <ul class="list-unstyled mt-3 text-start">
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Income Verification</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Family Status Check</li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card h-100">
+                <i class="fas fa-file-contract stat-icon mb-3"></i>
+                <h3>Admin Oversight</h3>
+                <p class="text-muted">NFSA Admins act as the central authority, manually reviewing and approving
+                    high-value transactions and user registrations.</p>
+                <ul class="list-unstyled mt-3 text-start">
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Manual Approval Workflow</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Audit Logs</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5 justify-content-center">
+        <div class="col-md-8 text-center">
+            <div class="p-4 rounded border border-2" style="border-color: var(--pink-light) !important;">
+                <h4 style="color: var(--pink-dark);">Why Verification is Critical</h4>
+                <p class="mb-0">Without robust verification, donation systems are vulnerable to fraud. Our multi-layered
+                    approach ensures 100% integrity of the ecosystem.</p>
+                <a th:href="@{/}" class="btn btn-primary mt-3">Back to Home</a>
+            </div>
+        </div>
+    </div>
+</div>
+</div></body></html>

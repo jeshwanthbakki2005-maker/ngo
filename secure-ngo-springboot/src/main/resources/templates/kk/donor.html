@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{kk/dashboard_layout :: layout(~{::title}, ~{::content}, 'dashboard')}">
+<head>
+    <title>NGO Fund Tracker - Donor Dashboard</title>
+</head>
+<body>
+<div th:fragment="content" class="content-scroll">
+            <style>
+                .ongoing-alert{background:linear-gradient(125deg,#fff7ed,#fff);border:1px solid #fed7aa;border-left:5px solid #f97316;border-radius:14px;padding:15px 17px;box-shadow:var(--card-shadow)}
+                .ongoing-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.ongoing-title{display:flex;align-items:center;gap:9px}.ongoing-title i{color:#f97316}.ongoing-title h3{font-size:.93rem;margin:0}.ongoing-title p{font-size:.69rem;color:#64748b;margin:2px 0 0}.ongoing-link{font-size:.72rem;color:#ea580c;font-weight:700;text-decoration:none}
+                .ongoing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.ongoing-card{background:#fff;border:1px solid #ffedd5;border-radius:12px;overflow:hidden;display:grid;grid-template-columns:108px 1fr;min-height:148px}.ongoing-thumb{width:108px;height:108px;margin:10px;position:relative;background:#e2e8f0;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(15,23,42,.16)}.ongoing-thumb img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}.ongoing-thumb:after{content:"";position:absolute;inset:55% 0 0;background:linear-gradient(to top,rgba(15,23,42,.72),transparent)}.ongoing-thumb-location{position:absolute;left:7px;bottom:6px;right:7px;z-index:1;color:#fff;font-size:.58rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ongoing-content{padding:10px 10px 9px 4px;display:flex;flex-direction:column;gap:7px}.ongoing-card-top{display:flex;justify-content:space-between;gap:8px}.ongoing-type{font-size:.78rem;font-weight:800;text-transform:capitalize}.ongoing-severity{font-size:.6rem;background:#fee2e2;color:#b91c1c;padding:3px 6px;border-radius:10px;font-weight:800;text-transform:uppercase}.ongoing-meta{display:grid;grid-template-columns:1fr 1fr;gap:5px}.ongoing-meta div{background:#f8fafc;border-radius:6px;padding:5px}.ongoing-meta span{display:block;font-size:.5rem;color:#94a3b8;text-transform:uppercase;font-weight:700}.ongoing-meta strong{display:block;font-size:.65rem;margin-top:2px}.ongoing-actions{display:flex;gap:5px}.ongoing-btn{flex:1;text-align:center;text-decoration:none;border-radius:7px;padding:6px 3px;font-size:.61rem;font-weight:800}.ongoing-view{background:#f1f5f9;color:#475569}.ongoing-donate{background:#f97316;color:#fff}.ongoing-empty{font-size:.75rem;color:#64748b;text-align:center;padding:10px}@media(max-width:600px){.ongoing-card{grid-template-columns:96px 1fr}.ongoing-thumb{width:96px;height:96px}}
+                /* Keep the square thumbnail inside its own column so it cannot cover report details. */
+                .ongoing-card{grid-template-columns:128px minmax(0,1fr)}
+                .ongoing-content{padding:10px 14px 10px 0;min-width:0}
+                @media(max-width:600px){.ongoing-card{grid-template-columns:112px minmax(0,1fr)}.ongoing-thumb{width:92px;height:92px}.ongoing-content{padding-right:9px}}
+            </style>
+            <!-- STAT CARDS -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div>
+                            <div class="stat-label">Total Donations</div>
+                            <div class="stat-value">&#8377;<span th:text="${#numbers.formatDecimal(total_donated ?: 0,0,'COMMA',0,'POINT')}">0</span></div>
+                        </div>
+                        <div class="stat-icon-wrap" style="background:#ede9fe;"><i class="fas fa-wallet" style="color:#7c3aed;"></i></div>
+                    </div>
+                    <div class="stat-trend up"><i class="fas fa-calendar"></i> &#8377;<span th:text="${#numbers.formatDecimal(thisMonthTotal ?: 0,0,'COMMA',0,'POINT')}">0</span> this month</div>
+                    <div class="sparkline-wrap" id="spark1"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div>
+                            <div class="stat-label">Donations Completed</div>
+                            <div class="stat-value" th:text="${totalContributionCount ?: 0}">0</div>
+                        </div>
+                        <div class="stat-icon-wrap" style="background:#d1fae5;"><i class="fas fa-check-circle" style="color:#059669;"></i></div>
+                    </div>
+                    <div class="stat-trend up"><i class="fas fa-check"></i> <span th:text="${donation_count ?: 0}">0</span> funds + <span th:text="${materialDonationCount ?: 0}">0</span> materials</div>
+                    <div class="sparkline-wrap" id="spark2"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div>
+                            <div class="stat-label">Account Status</div>
+                            <div class="stat-value" style="font-size:1.1rem;" th:text="${donor?.isVerified ? 'Verified' : 'Pending'}">Pending</div>
+                        </div>
+                        <div class="stat-icon-wrap" style="background:#fef3c7;"><i class="fas fa-shield-alt" style="color:#d97706;"></i></div>
+                    </div>
+                    <div class="stat-trend active"><i class="fas fa-circle" style="font-size:.5rem;"></i>
+                        <span th:text="${donor?.isVerified ? 'Active and Verified' : 'Awaiting Verification'}">Awaiting</span>
+                    </div>
+                    <div class="sparkline-wrap" id="spark3"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <div>
+                            <div class="stat-label">Active Campaigns</div>
+                            <div class="stat-value" th:text="${activeCampaignsCount}">0</div>
+                        </div>
+                        <div class="stat-icon-wrap" style="background:#fee2e2;"><i class="fas fa-flag" style="color:#dc2626;"></i></div>
+                    </div>
+                    <div class="stat-trend active" style="color:#dc2626;"><i class="fas fa-circle" style="font-size:.5rem;"></i> Active Now</div>
+                    <div class="sparkline-wrap" id="spark4"></div>
+                </div>
+            </div>
+            <section class="ongoing-alert">
+                <div class="ongoing-head"><div class="ongoing-title"><i class="fas fa-triangle-exclamation"></i><div><h3>Ongoing Disaster Situations</h3><p>Active verified campaigns currently requiring urgent support.</p></div></div><a class="ongoing-link" th:href="@{/kk/campaigns}">View All <i class="fas fa-arrow-right"></i></a></div>
+                <div class="ongoing-grid" th:if="${ongoingDisasters != null and !#lists.isEmpty(ongoingDisasters)}">
+                    <article class="ongoing-card" th:each="campaign:${ongoingDisasters}"><div class="ongoing-thumb"><img th:if="${campaign.photoBase64 != null and !#strings.isEmpty(campaign.photoBase64)}" th:src="|data:image/jpeg;base64,${campaign.photoBase64}|" alt="Disaster"><img th:unless="${campaign.photoBase64 != null and !#strings.isEmpty(campaign.photoBase64)}" th:src="${campaign.disasterType == 'earthquake' ? '/images/earthquake_disaster.png' : (campaign.disasterType == 'cyclone' ? '/images/cyclone_disaster.png' : '/images/flood_disaster.png')}" alt="Disaster"><div class="ongoing-thumb-location"><i class="fas fa-location-dot"></i> <span th:text="${campaign.location + (campaign.state != null ? ', ' + campaign.state : '')}">Location</span></div></div><div class="ongoing-content"><div class="ongoing-card-top"><div class="ongoing-type" th:text="${campaign.disasterType}">Flood</div><span class="ongoing-severity" th:text="${campaign.severity ?: 'Urgent'}">High</span></div><div class="ongoing-meta"><div><span>Families</span><strong th:text="${campaign.familiesAffected ?: 0}">0</strong></div><div><span>Funds Needed</span><strong>&#8377;<span th:text="${#numbers.formatDecimal(campaign.requiredAmount ?: 0,0,'COMMA',0,'POINT')}">0</span></strong></div><div><span>Raised</span><strong>&#8377;<span th:text="${#numbers.formatDecimal(campaign.amountRaised ?: 0,0,'COMMA',0,'POINT')}">0</span></strong></div><div><span>Status</span><strong style="color:#16a34a">Active</strong></div></div><div class="ongoing-actions"><a class="ongoing-btn ongoing-view" th:href="@{/kk/campaigns}"><i class="fas fa-eye"></i> Details</a><a class="ongoing-btn ongoing-donate" th:href="@{/kk/donate(purpose=${campaign.disasterType})}"><i class="fas fa-heart"></i> Donate</a></div></div></article>
+                </div>
+                <div class="ongoing-empty" th:if="${ongoingDisasters == null or #lists.isEmpty(ongoingDisasters)}">No active disaster situations currently.</div>
+            </section>
+            <!-- MID ROW -->
+            <div class="mid-row">
+                <!-- Overview Chart -->
+                <div class="card">
+                    <div class="card-head">
+                        <h3>Donation Overview</h3>
+                        <span class="year-select">This Year <i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="chart-wrap"><canvas id="overviewChart"></canvas></div>
+                </div>
+                <!-- Recent Donations -->
+                <div class="card">
+                    <div class="card-head"><h3>Recent Donations</h3><a class="view-all" th:href="@{/kk/history}">View All</a></div>
+                    <div class="card-body">
+                        <div class="donation-item" th:each="c : ${recentContributions}">
+                            <div class="d-avatar" th:style="${c.type == 'material'} ? 'background:linear-gradient(135deg,#6ee7b7,#059669);' : 'background:linear-gradient(135deg,#a78bfa,#7c3aed);'"><i class="fas" th:classappend="${c.type == 'material'} ? 'fa-box' : 'fa-heart'"></i></div>
+                            <div class="d-info"><div class="d-name" th:text="${c.title}">Purpose</div><div class="d-time" th:text="${#temporals.format(c.date, 'dd MMM yyyy, hh:mm a')}">Time</div></div>
+                            <div class="d-amount" th:style="${c.type == 'material'} ? 'color:#059669;' : ''" th:text="${c.value}">Value</div>
+                        </div>
+                        <div th:if="${recentContributions == null or #lists.isEmpty(recentContributions)}" style="text-align:center; padding: 2rem 0; color: #94a3b8;">
+                            <i class="fas fa-box-open" style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
+                            <p>No recent donations found.</p>
+                            <a th:href="@{/kk/donate}" style="color: #7c3aed; text-decoration: none; font-weight: 500;">Make your first donation</a>
+                        </div>
+                        <a class="more-btn" th:href="@{/kk/history}">More Donations <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                <!-- Beneficiary Requests -->
+                <div class="card">
+                    <div class="card-head"><h3>Beneficiary Requests</h3><a class="view-all" th:href="@{/kk/beneficiaries}">View All</a></div>
+                    <div class="card-body">
+                        <div class="bene-item" th:each="r : ${beneficiaryRequests}">
+                            <div class="bene-cat-icon" style="background:#dbeafe;color:#1d4ed8;"><i class="fas fa-hand-holding-heart"></i></div>
+                            <div class="bene-info"><div class="bene-name" th:text="${r.disasterType}">Type</div><div class="bene-cat" th:text="${r.description != null ? (r.description.length() > 30 ? r.description.substring(0,30) + '...' : r.description) : ''}">Desc</div></div>
+                            <div class="bene-time" th:text="${#temporals.format(r.createdAt, 'dd MMM yyyy')}">Date</div>
+                        </div>
+                        <div th:if="${beneficiaryRequests == null or #lists.isEmpty(beneficiaryRequests)}" style="text-align:center; padding: 2rem 0; color: #94a3b8;">
+                            <i class="fas fa-clipboard-list" style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
+                            <p>No active requests right now.</p>
+                        </div>
+                        <a class="more-btn" th:href="@{/kk/beneficiaries}">More Requests <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            <!-- BOTTOM ROW -->
+            <div class="bottom-row">
+                <!-- Top Donors -->
+                <div class="card">
+                    <div class="card-head"><h3>Top Donors</h3><a class="view-all" href="#">View All</a></div>
+                    <div class="card-body" style="padding-top:0;">
+                        <table class="donors-table">
+                            <thead><tr><th>#</th><th>Donor Name</th><th style="text-align:right;">Total Donations</th></tr></thead>
+                            <tbody><tr th:each="td,s:${topDonors}"><td><i th:if="${s.index < 3}" class="fas fa-medal" th:style="${s.index == 0 ? 'color:#fbbf24' : (s.index == 1 ? 'color:#94a3b8' : 'color:#b45309')}"></i><span th:if="${s.index >= 3}" th:text="${s.count}">4</span></td><td><div class="td-name-wrap"><div class="d-avatar" style="width:28px;height:28px;font-size:.65rem;background:linear-gradient(135deg,#c7d2fe,#4f46e5);" th:text="${#strings.substring(td.name,0,1)}">D</div><span th:text="${td.name}">Donor</span></div></td><td style="text-align:right;font-weight:700;">&#8377;<span th:text="${#numbers.formatDecimal(td.amount,0,'COMMA',0,'POINT')}">0</span></td></tr><tr th:if="${topDonors == null or #lists.isEmpty(topDonors)}"><td colspan="3" style="text-align:center;color:#94a3b8">No donor data available.</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Fund Distribution -->
+                <div class="card">
+                    <div class="card-head"><h3>Fund Distribution</h3></div>
+                    <div class="donut-wrap">
+                        <canvas id="donutChart" style="max-width:160px;max-height:160px;"></canvas>
+                        <div class="donut-center">
+                            <div class="dc-val">&#8377;<span th:text="${#numbers.formatDecimal(total_donated ?: 0,0,'COMMA',0,'POINT')}">0</span></div>
+                            <div class="dc-lbl">Total</div>
+                        </div>
+                    </div>
+                    <div class="legend-list"><div class="legend-item" th:each="label,s:${purposeLabels}"><div class="legend-dot" style="background:#4f46e5;"></div><span class="legend-label" th:text="${label}">Cause</span><span class="legend-val">&#8377;<span th:text="${#numbers.formatDecimal(purposeValues[s.index],0,'COMMA',0,'POINT')}">0</span></span></div><div th:if="${purposeLabels == null or #lists.isEmpty(purposeLabels)}" style="text-align:center;color:#94a3b8;padding:12px">No distribution data.</div></div>
+                    <div style="padding:0 20px 16px;"><a class="more-btn" href="#">View Full Report <i class="fas fa-arrow-right"></i></a></div>
+                </div>
+                <!-- Recent Activities -->
+                <div class="card">
+                    <div class="card-head"><h3>Recent Activities</h3></div>
+                    <div class="card-body">
+                        <div class="activity-item" th:each="d : ${recentDonations}">
+                            <div class="act-icon" style="background:#ede9fe;color:#7c3aed;"><i class="fas fa-donate"></i></div>
+                            <div class="act-info"><div class="act-text">You donated &#8377;<span th:text="${#numbers.formatInteger(d.amount, 0, 'COMMA')}"></span> to <span th:text="${d.purpose != null ? d.purpose : 'General Fund'}"></span></div><div class="act-time" th:text="${#temporals.format(d.createdAt, 'dd MMM yyyy, hh:mm a')}">Time</div></div>
+                        </div>
+                        <div class="activity-item" th:each="m:${recentMaterialDonations}"><div class="act-icon" style="background:#dcfce7;color:#059669"><i class="fas fa-box"></i></div><div class="act-info"><div class="act-text">You pledged <b th:text="${m.quantity}">0</b> item(s) for <span th:text="|${#strings.capitalize(m.materialType ?: 'Material')} request #${m.requestId}|">material request</span></div><div class="act-time" th:text="${#temporals.format(m.createdAt,'dd MMM yyyy, hh:mm a')}">Time</div></div></div>
+                        <div th:if="${(recentDonations == null or #lists.isEmpty(recentDonations)) and (recentMaterialDonations == null or #lists.isEmpty(recentMaterialDonations))}" style="text-align:center;color:#94a3b8;padding:20px">No recent activities.</div>
+                    </div>
+                </div>
+            </div>
+<script th:inline="javascript">
+// ── SVG Sparkline (no Chart.js dependency) ──────────────────────────────
+function svgSparkline(containerId, data, strokeColor, fillColor) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const W = el.offsetWidth || 200, H = 38;
+  const min = Math.min(...data), max = Math.max(...data);
+  const pad = 2;
+  const xs = data.map((_, i) => pad + (i / (data.length - 1)) * (W - pad * 2));
+  const ys = data.map(v => H - pad - ((v - min) / (max - min || 1)) * (H - pad * 2));
+  const line = xs.map((x, i) => (i === 0 ? 'M' : 'L') + x.toFixed(1) + ',' + ys[i].toFixed(1)).join(' ');
+  const area = line + ' L' + xs[xs.length-1].toFixed(1) + ',' + H + ' L' + xs[0].toFixed(1) + ',' + H + ' Z';
+  el.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">' +
+    '<path d="' + area + '" fill="' + fillColor + '" />' +
+    '<path d="' + line + '" fill="none" stroke="' + strokeColor + '" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>' +
+    '</svg>';
+}
+const realMonthlyDonations = /*[[${monthlyDonations}]]*/ [0,0,0,0,0,0,0,0,0,0,0,0];
+const realPurposeLabels = /*[[${purposeLabels}]]*/ [];
+const realPurposeValues = /*[[${purposeValues}]]*/ [];
+svgSparkline('spark1',realMonthlyDonations,'#7c3aed','rgba(124,58,237,0.08)');
+svgSparkline('spark2',realMonthlyDonations.map((v,i)=>v>0?i+1:0),'#059669','rgba(5,150,105,0.08)');
+svgSparkline('spark3',[1,1,1,1,1,1,1,1,1,1,1,1],'#d97706','rgba(217,119,6,0.08)');
+svgSparkline('spark4',Array(12).fill(/*[[${activeCampaignsCount ?: 0}]]*/ 0),'#dc2626','rgba(220,38,38,0.08)');
+
+// ── Overview + Donut Charts (Chart.js) ───────────────────────────────────
+requestAnimationFrame(function(){
+  var octx=document.getElementById('overviewChart');
+  if(octx) new Chart(octx,{type:'line',data:{labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],datasets:[{label:'Donations',data:realMonthlyDonations,borderColor:'#4f46e5',backgroundColor:'rgba(79,70,229,0.08)',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#4f46e5',fill:true,tension:0.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return '\u20B9'+c.parsed.y.toLocaleString('en-IN');}}}},scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{beginAtZero:true,grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:11},callback:function(v){return '\u20B9'+(v>=100000?(v/100000).toFixed(1)+'L':(v/1000)+'K');}}}}}});
+  var dctx=document.getElementById('donutChart');
+  if(dctx) new Chart(dctx,{type:'doughnut',data:{labels:realPurposeLabels.length?realPurposeLabels:['No donations'],datasets:[{data:realPurposeValues.length?realPurposeValues:[1],backgroundColor:['#4f46e5','#10b981','#f59e0b','#ef4444','#0891b2','#8b5cf6'],borderWidth:0,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:true,cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.label+': \u20B9'+(realPurposeValues.length?c.parsed.toLocaleString('en-IN'):'0');}}}}}});
+});
+</script>
+</div>
+</body>
+</html>

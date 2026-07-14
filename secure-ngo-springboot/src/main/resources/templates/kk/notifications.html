@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{kk/dashboard_layout :: layout(~{::title}, ~{::content}, 'notifications')}">
+<head>
+    <title>Notifications - NGO Fund Tracker</title>
+</head>
+<body>
+<div th:fragment="content">
+    <style>.nh-list{display:grid;gap:10px}.nh-item{display:flex;gap:13px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:15px;text-decoration:none;color:#1e293b;box-shadow:0 2px 8px rgba(15,23,42,.04)}.nh-item:hover{border-color:#c4b5fd}.nh-icon{width:42px;height:42px;flex:0 0 42px;border-radius:10px;background:#ede9fe;color:#7c3aed;display:flex;align-items:center;justify-content:center}.nh-item h4{font-size:.82rem;margin:0 0 4px}.nh-item p{font-size:.72rem;color:#64748b;margin:0 0 5px}.nh-item time{font-size:.63rem;color:#94a3b8}</style>
+    <div class="page-header">
+        <h2>Notifications</h2>
+        <p>Stay updated with alerts and messages.</p>
+    </div>
+    <div class="nh-list" th:if="${notifications != null and !#lists.isEmpty(notifications)}"><a class="nh-item" th:each="notice:${notifications}" th:href="${notice.link}"><div class="nh-icon"><i class="fas" th:classappend="${notice.type == 'donation' ? 'fa-wallet' : 'fa-bullhorn'}"></i></div><div><h4 th:text="${notice.title}">Notification</h4><p th:text="${notice.message}">Details</p><time th:text="${#temporals.format(notice.date,'dd MMM yyyy, hh:mm a')}">Date</time></div></a></div>
+    <div class="empty-state" th:if="${notifications == null or #lists.isEmpty(notifications)}">
+        <div class="empty-icon"><i class="fas fa-bell"></i></div>
+        <h3>All caught up!</h3>
+        <p>You have no new notifications right now. We'll alert you when there are updates to your campaigns.</p>
+    </div>
+</div>
+</body>
+</html>

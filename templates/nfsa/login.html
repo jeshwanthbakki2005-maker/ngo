@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}NFSA Login - NGO Fund Tracker{% endblock %}
+
+{% block navbar %}
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="{{ url_for('home') }}">
+            <i class="fas fa-hand-holding-heart me-2 floating-icon"></i>NGO Fund Tracker
+        </a>
+        <a href="{{ url_for('home') }}" class="btn btn-light" style="border-radius: 25px;">
+            <i class="fas fa-home me-2"></i>Home
+        </a>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card">
+            <div class="card-header text-center py-4">
+                <i class="fas fa-user-shield fa-3x mb-3 floating-icon"></i>
+                <h3 class="mb-0">NFSA Login</h3>
+                <p class="mb-0 opacity-75">Secure Administrator Access</p>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('nfsa_login') }}">
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fas fa-envelope me-2" style="color: #DB7093;"></i>Email
+                            Address</label>
+                        <input type="email" class="form-control" name="email" required placeholder="admin@ngo.org">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label"><i class="fas fa-lock me-2"
+                                style="color: #DB7093;"></i>Password</label>
+                        <div class="input-group position-relative">
+                            <input type="password" class="form-control" id="passwordField" name="password" required
+                                placeholder="Enter your password">
+                            <button type="button"
+                                class="btn btn-outline-secondary position-absolute end-0 top-50 translate-middle-y border-0 togglePasswordBtn"
+                                style="z-index: 10; background: transparent; cursor: pointer;">
+                                <i class="fas fa-eye eyeIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 text-end">
+                        <a href="{{ url_for('forgot_password') }}" class="text-decoration-none small"
+                            style="color: #DB7093;">Forgot Password?</a><br>
+                        <a href="{{ url_for('forgot_password') }}" class="text-decoration-none small"
+                            style="color: #C71585; font-weight: bold;">Reset Password</a>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login to Dashboard
+                        </button>
+                    </div>
+                </form>
+
+                <div class="text-center mt-4">
+                    <p class="mb-0">Don't have an account?
+                        <a href="{{ url_for('nfsa_signup') }}" style="color: #C71585; font-weight: 600;">
+                            <i class="fas fa-user-plus me-1"></i>Register here
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <div class="card p-3">
+                <p class="mb-0"><i class="fas fa-shield-alt me-2" style="color: #DB7093;"></i>Protected by JWT Token
+                    Authentication</p>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.querySelectorAll('.togglePasswordBtn').forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+            const passwordField = this.closest('.input-group').querySelector('input[type="password"], input[type="text"]');
+            const eyeIcon = this.querySelector('.eyeIcon');
+
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordField.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        });
+    });
+</script>{% endblock %}

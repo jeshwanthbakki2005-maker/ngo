@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{nfsa/nfsa_layout :: layout(~{::title}, ~{::content}, 'donors')}">
+<head>
+    <title>Donors Management - Admin Panel</title>
+</head>
+<body>
+<div th:fragment="content">
+<style>
+    /* ── Page Styles ── */
+    .page-header { margin-bottom: 24px; }
+    .page-header h2 { font-size: 1.3rem; font-weight: 700; color: var(--text-main); margin: 0 0 4px; }
+    .page-header p  { font-size: 0.85rem; color: var(--text-muted); margin: 0; }
+
+    /* ── Table Card ── */
+    .table-card { background: #fff; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 1px 3px rgba(0,0,0,.03); overflow: hidden; margin-bottom: 24px; }
+    .table-card-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--border-color); background: #f8fafc; }
+    .table-card-title { font-size: 0.9rem; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+    
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 11px 16px; font-size: 0.73rem; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border-color); white-space: nowrap; text-transform: uppercase; letter-spacing: .03em; }
+    td { padding: 12px 16px; font-size: 0.82rem; color: var(--text-main); border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+    
+    /* ── User Row & Sub Row ── */
+    tr.user-row { transition: background 0.2s; }
+    tr.user-row:hover { background: #f8fafc; }
+    tr.user-row.expanded { background: #eff6ff; }
+    
+    .history-row { display: none; background: #f8fafc; }
+    .history-row.active { display: table-row; }
+    .history-container { padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; background: white; margin: 10px 0; box-shadow: inset 0 2px 4px rgba(0,0,0,.02); }
+    
+    .history-table { width: 100%; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; }
+    .history-table th { background: #f1f5f9; padding: 8px 12px; font-size: 0.7rem; }
+    .history-table td { padding: 8px 12px; font-size: 0.78rem; border-bottom: 1px solid var(--border-color); }
+    .history-table tr:last-child td { border-bottom: none; }
+    .history-title { font-size: 0.85rem; font-weight: 600; color: var(--primary); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+
+    /* ── User Cell ── */
+    .user-cell { display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 34px; height: 34px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; background: linear-gradient(135deg, #6366f1, #4f46e5); }
+    .user-name { font-size: 0.85rem; font-weight: 600; color: var(--text-main); }
+    .user-email { font-size: 0.73rem; color: var(--text-muted); }
+
+    /* ── Buttons & Badges ── */
+    .btn-action { padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px; border: 1px solid transparent; }
+    .btn-outline-primary { background: white; color: var(--primary); border-color: var(--primary); }
+    .btn-outline-primary:hover { background: var(--primary); color: white; }
+    
+    .status-badge { padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+    .status-verified { background: #d1fae5; color: #065f46; }
+    .status-pending  { background: #fef3c7; color: #92400e; }
+    .status-completed { background: #d1fae5; color: #065f46; }
+
+    /* ── Empty State ── */
+    .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+    .empty-state i { font-size: 2.5rem; margin-bottom: 12px; opacity: .3; display: block; }
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+    <h2><i class="fas fa-hand-holding-heart" style="color:var(--primary);margin-right:8px;"></i>Donors & Payment History</h2>
+    <p>View registered donors and track their complete donation payment history</p>
+</div>
+
+<!-- Table Card -->
+<div class="table-card">
+    <div class="table-card-header">
+        <div class="table-card-title">
+            <i class="fas fa-list-ul" style="color:var(--text-muted);"></i>
+            Donor Accounts
+        </div>
+        <div class="row-count">
+            Total Donors: <span th:text="${donors != null ? donors.size() : 0}" style="font-weight:700;color:var(--text-main);">0</span>
+        </div>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Donor Profile</th>
+                <th>Contact Details</th>
+                <th>Verification</th>
+                <th>Registration Date</th>
+                <th style="text-align:right;">Actions</th>
+            </tr>
+        </thead>
+        <tbody th:if="${donors != null and !#lists.isEmpty(donors)}">
+            <th:block th:each="donor : ${donors}">
+                <!-- Donor Row -->
+                <tr class="user-row" th:id="'row-' + ${donor.id}">
+                    <td>
+                        <div class="user-cell">
+                            <div class="avatar" th:text="${#strings.substring(donor.fullName,0,1)}">A</div>
+                            <div>
+                                <div class="user-name" th:text="${donor.fullName}">Name</div>
+                                <div class="user-email" th:text="'ID: DON-' + ${donor.id}">ID</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="font-size:0.8rem;font-weight:500;" th:text="${donor.email}">email</div>
+                        <div style="font-size:0.75rem;color:var(--text-muted);" th:text="${donor.phone}">phone</div>
+                    </td>
+                    <td>
+                        <span th:if="${donor.isVerified}" class="status-badge status-verified"><i class="fas fa-check-circle"></i> Verified</span>
+                        <span th:unless="${donor.isVerified}" class="status-badge status-pending"><i class="fas fa-clock"></i> Pending</span>
+                    </td>
+                    <td th:text="${#temporals.format(donor.createdAt, 'MMM dd, yyyy')}">Date</td>
+                    <td style="text-align:right;">
+                        <button class="btn-action btn-outline-primary" th:onclick="'toggleHistory(' + ${donor.id} + ')'">
+                            <i class="fas fa-history"></i> Payment History
+                        </button>
+                    </td>
+                </tr>
+                
+                <!-- Expanded Payment History Row -->
+                <tr class="history-row" th:id="'history-' + ${donor.id}">
+                    <td colspan="5" style="padding: 0 16px;">
+                        <div class="history-container">
+                            <div class="history-title">
+                                <i class="fas fa-money-check-alt"></i> Payment History for <span th:text="${donor.fullName}"></span>
+                            </div>
+                            
+                            <!-- Check if donor has donations -->
+                            <div th:with="donations=${donorDonations != null ? donorDonations.get(donor.id) : null}">
+                                <div th:if="${donations == null or #lists.isEmpty(donations)}" class="empty-state" style="padding: 20px;">
+                                    <i class="fas fa-receipt"></i>
+                                    <p>No payment history found for this donor.</p>
+                                </div>
+                                
+                                <table class="history-table" th:if="${donations != null and !#lists.isEmpty(donations)}">
+                                    <thead>
+                                        <tr>
+                                            <th>Transaction ID</th>
+                                            <th>Date</th>
+                                            <th>Purpose / Campaign</th>
+                                            <th>Method</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="don : ${donations}">
+                                            <td style="font-family:monospace;font-weight:600;color:#64748b;" th:text="${don.transactionId != null ? don.transactionId : 'TXN-' + don.id}">TXN-123</td>
+                                            <td th:text="${#temporals.format(don.createdAt, 'MMM dd, yyyy HH:mm')}">Date</td>
+                                            <td style="font-weight:500;" th:text="${#strings.capitalize(don.purpose)}">Flood Relief</td>
+                                            <td>
+                                                <span style="background:#e2e8f0;padding:2px 6px;border-radius:4px;font-size:0.7rem;font-weight:600;" th:text="${don.paymentMethod != null ? don.paymentMethod : 'Card'}">Card</span>
+                                            </td>
+                                            <td style="font-weight:700;color:#0f172a;" th:text="'₹' + ${#numbers.formatDecimal(don.amount, 1, 'COMMA', 2, 'POINT')}">₹0.00</td>
+                                            <td>
+                                                <span th:if="${#strings.equalsIgnoreCase(don.status, 'completed')}" class="status-badge status-completed">Completed</span>
+                                                <span th:unless="${#strings.equalsIgnoreCase(don.status, 'completed')}" class="status-badge status-pending" th:text="${don.status}">Pending</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </th:block>
+        </tbody>
+    </table>
+    
+    <div th:if="${donors == null or #lists.isEmpty(donors)}" class="empty-state">
+        <i class="fas fa-users-slash"></i>
+        <p>No donors registered yet.</p>
+    </div>
+</div>
+
+<script>
+    function toggleHistory(donorId) {
+        const historyRow = document.getElementById('history-' + donorId);
+        const mainRow = document.getElementById('row-' + donorId);
+        
+        if (historyRow.classList.contains('active')) {
+            historyRow.classList.remove('active');
+            mainRow.classList.remove('expanded');
+        } else {
+            // Optional: close other open histories
+            /*
+            document.querySelectorAll('.history-row.active').forEach(row => row.classList.remove('active'));
+            document.querySelectorAll('.user-row.expanded').forEach(row => row.classList.remove('expanded'));
+            */
+            
+            historyRow.classList.add('active');
+            mainRow.classList.add('expanded');
+        }
+    }
+</script>
+</div>
+</body>
+</html>
